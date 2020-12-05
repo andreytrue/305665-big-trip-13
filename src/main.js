@@ -9,12 +9,9 @@ import {createFormEditorTemplate} from "./view/form-editor.js";
 import {createPointTemplate} from "./view/point.js";
 import {generatePoint} from "./mock/point.js";
 
-const TASK_COUNT = 3;
-const POINT_COUNT = 15;
-const FIRST_ELEMENT = 0;
-const SECOND_ELEMENT = 1;
+const TASK_COUNT = 15;
 
-const points = new Array(POINT_COUNT).fill().map(generatePoint);
+const points = new Array(TASK_COUNT).fill().map(generatePoint);
 
 const render = (container, template, place) => {
   container.insertAdjacentHTML(place, template);
@@ -36,7 +33,7 @@ render(tripEvents, createFormListTemplate(), 'beforeend');
 
 const tripEventsList = document.querySelector('.trip-events__list');
 
-for (let i = 0; i < POINT_COUNT; i++) {
+for (let i = 0; i < TASK_COUNT; i++) {
   if (i === 0) {
     render(tripEventsList, createFormEditorTemplate(points[i]), 'afterbegin')
   } else if (i === 1) {
