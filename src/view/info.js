@@ -1,9 +1,7 @@
 export const createInfoTemplate = (points) => {
-  const citiesList = [];
-
-  for (let i = 0; i < points.length; i++) {
-    citiesList[i] = points[i].city;
-  }
+  const citiesList = points.map(function (point) {
+    return point.city;
+  });
 
   const cities = new Set(citiesList);
   const uniqCities = Array.from(cities);

@@ -27,6 +27,9 @@ const generateEndlessCity = () => {
   return city[randomIndex];
 };
 
+const SENTENCE_MIN_LENGTH = 1;
+const SENTENCE_MAX_LENGTH = 5;
+
 const generateDescription = () => {
   const description = [
     `Lorem ipsum dolor sit amet, consectetur adipiscing elit.`,
@@ -43,7 +46,7 @@ const generateDescription = () => {
   ];
 
   let pointDescription = ``;
-  const randomAmount = getRandomInteger(1, 5);
+  const randomAmount = getRandomInteger(SENTENCE_MIN_LENGTH, SENTENCE_MAX_LENGTH);
 
   for (let i = 0; i < randomAmount; i++) {
     const randomIndex = getRandomInteger(0, description.length - 1);
@@ -53,9 +56,12 @@ const generateDescription = () => {
   return pointDescription;
 };
 
+const PHOTOS_MIN_AMOUNT = 1;
+const PHOTOS_MAX_AMOUNT = 5;
+
 const generatePhoto = () => {
   const photos = [];
-  const randomAmount = getRandomInteger(1, 5);
+  const randomAmount = getRandomInteger(PHOTOS_MIN_AMOUNT, PHOTOS_MAX_AMOUNT);
 
   for (let i = 0; i < randomAmount; i++) {
     const randomPhoto = getRandomInteger(1, 100);
@@ -73,6 +79,9 @@ const generateDate = () => {
   return dayjs(isDate).format(`DD/MM/YYYY:H:m`);
 };
 
+const PRICE_MIN_VALUE = 10;
+const PRICE_MAX_VALUE = 10;
+
 export const generatePoint = () => {
   const offers = {};
 
@@ -80,7 +89,7 @@ export const generatePoint = () => {
     type: generateType(),
     city: generateEndlessCity(),
     date: generateDate(),
-    price: getRandomInteger(10, 100),
+    price: getRandomInteger(PRICE_MIN_VALUE, PRICE_MAX_VALUE),
     description: generateDescription(),
     photo: generatePhoto(),
     offers,

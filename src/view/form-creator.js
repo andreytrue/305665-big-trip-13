@@ -1,14 +1,9 @@
 export const createNewFormElementTemplate = (point) => {
   const {type, city, price, description, photo} = point;
 
-  const insertPhoto = (picture) => {
-    let photos = ``;
-    for (let i = 0; i < picture.length; i++) {
-      photos += `<img class="event__photo" src="${picture[i]}" alt="Event photo"> &#013;`;
-    }
-
-    return photos;
-  };
+  const photos = photo.map(function (picture) {
+    return `<img class="event__photo" src="${picture}" alt="Event photo"> &#013;`;
+  });
 
   return `<li class="trip-events__item">
     <form class="event event--edit" action="#" method="post">
@@ -166,7 +161,7 @@ export const createNewFormElementTemplate = (point) => {
 
           <div class="event__photos-container">
             <div class="event__photos-tape">
-              ${insertPhoto(photo)}
+              ${photos}
             </div>
           </div>
         </section>
