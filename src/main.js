@@ -7,18 +7,21 @@ import {createFormListTemplate} from "./view/form-list.js";
 import {createNewFormElementTemplate} from "./view/form-creator.js";
 import {createFormEditorTemplate} from "./view/form-editor.js";
 import {createPointTemplate} from "./view/point.js";
+import {generatePoint} from "./mock/point.js";
 
-const TASK_COUNT = 3;
+const TASK_COUNT = 15;
+
+const points = new Array(TASK_COUNT).fill().map(generatePoint);
 
 const render = (container, template, place) => {
   container.insertAdjacentHTML(place, template);
 };
 
 const tripMain = document.querySelector('.trip-main');
-render(tripMain, createInfoTemplate(), 'afterbegin');
+render(tripMain, createInfoTemplate(points), 'afterbegin');
 
 const tripInfo = document.querySelector('.trip-info');
-render(tripInfo, createPriceTemplate(), 'beforeend')
+render(tripInfo, createPriceTemplate(points), 'beforeend')
 
 const tripControls = document.querySelector('.trip-controls');
 render(tripControls, createMenuTemplate(), 'afterbegin')
@@ -29,9 +32,13 @@ render(tripEvents, createSortTemplate(), 'afterbegin');
 render(tripEvents, createFormListTemplate(), 'beforeend');
 
 const tripEventsList = document.querySelector('.trip-events__list');
-render(tripEventsList, createNewFormElementTemplate(), 'beforeend')
-render(tripEventsList, createFormEditorTemplate(), 'afterbegin')
 
 for (let i = 0; i < TASK_COUNT; i++) {
-  render(tripEventsList, createPointTemplate(), 'beforeend')
+  if (i === 0) {
+    render(tripEventsList, createFormEditorTemplate(points[i]), 'afterbegin')
+  } else if (i === 1) {
+    render(tripEventsList, createNewFormElementTemplate(points[i]), 'beforeend')
+  } else {
+    render(tripEventsList, createPointTemplate(points[i]), 'beforeend')
+  }
 };
