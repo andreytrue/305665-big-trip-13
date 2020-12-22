@@ -1,4 +1,6 @@
-export const createPointTemplate = (point) => {
+import {createElement} from "../utils.js";
+
+const createPointTemplate = (point) => {
   const {type, city, price} = point;
 
   return `<li class="trip-events__item">
@@ -44,3 +46,26 @@ export const createPointTemplate = (point) => {
     </div>
   </li>`;
 };
+
+export default class Point {
+  constructor(point) {
+    this._point = point;
+    this._element = null;
+  }
+
+  getTemplate() {
+    return createPointTemplate(this._point);
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+}

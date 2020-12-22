@@ -1,44 +1,61 @@
-import {createInfoTemplate} from "./view/info.js";
-import {createPriceTemplate} from "./view/price.js";
-import {createMenuTemplate} from "./view/menu.js";
-import {createFiltersTemplate} from "./view/filters.js";
-import {createSortTemplate} from "./view/sort.js";
-import {createFormListTemplate} from "./view/form-list.js";
-import {createNewFormElementTemplate} from "./view/form-creator.js";
-import {createFormEditorTemplate} from "./view/form-editor.js";
-import {createPointTemplate} from "./view/point.js";
+import Info from "./view/info.js";
+import Price from "./view/price.js";
+import Menu from "./view/menu.js";
+import Filters from "./view/filters.js";
+import Sort from "./view/sort.js";
+import FormList from "./view/form-list.js";
+import FormCreator from "./view/form-creator.js";
+import FormEditor from "./view/form-editor.js";
+import Point from "./view/point.js";
 import {generatePoint} from "./mock/point.js";
+import {render, RenderPosition} from "./utils.js";
 
 const TASK_COUNT = 15;
 
+const renderPoint = (pointListElement, point) => {
+  const pointComponent = new Point(point);
+  const pointEditComponent = new FormEditor(point);
+
+  const replacePointToEdit = () => {
+    pointListElement.replaceChild(pointEditComponent.getElement(), pointComponent.getElement());
+  };
+
+  const replaceEditToPoint = () => {
+    pointListElement.replaceChild(pointComponent.getElement(), pointEditComponent.getElement());
+  };
+
+  pointComponent.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, () => {
+    replacePointToEdit();
+  });
+
+  pointEditComponent.getElement().querySelector(`form`).addEventListener(`submit`, (evt) => {
+    evt.preventDefault();
+    replaceEditToPoint();
+  });
+
+  render(pointListElement, pointComponent.getElement(), RenderPosition.BEFOREEND);
+}
+
 const points = new Array(TASK_COUNT).fill().map(generatePoint);
 
-const render = (container, template, place) => {
-  container.insertAdjacentHTML(place, template);
-};
-
 const tripMain = document.querySelector('.trip-main');
-render(tripMain, createInfoTemplate(points), 'afterbegin');
+render(tripMain, new Info(points).getElement(), RenderPosition.AFTERBEGIN);
 
 const tripInfo = document.querySelector('.trip-info');
-render(tripInfo, createPriceTemplate(points), 'beforeend')
+render(tripInfo, new Price(points).getElement(), RenderPosition.BEFOREEND);
 
 const tripControls = document.querySelector('.trip-controls');
-render(tripControls, createMenuTemplate(), 'afterbegin')
-render(tripControls, createFiltersTemplate(), 'beforeend')
+render(tripControls, new Menu().getElement(), RenderPosition.AFTERBEGIN);
+render(tripControls, new Filters().getElement(), RenderPosition.BEFOREEND);
 
 const tripEvents = document.querySelector('.trip-events');
-render(tripEvents, createSortTemplate(), 'afterbegin');
-render(tripEvents, createFormListTemplate(), 'beforeend');
+const PointList = new FormList();
+render(tripEvents, new Sort().getElement(), RenderPosition.AFTERBEGIN);
+render(tripEvents, PointList.getElement(), RenderPosition.BEFOREEND);
 
 const tripEventsList = document.querySelector('.trip-events__list');
+const editPoint = document.querySelectorAll('.event__rollup-btn');
 
 for (let i = 0; i < TASK_COUNT; i++) {
-  if (i === 0) {
-    render(tripEventsList, createFormEditorTemplate(points[i]), 'afterbegin')
-  } else if (i === 1) {
-    render(tripEventsList, createNewFormElementTemplate(points[i]), 'beforeend')
-  } else {
-    render(tripEventsList, createPointTemplate(points[i]), 'beforeend')
-  }
+  renderPoint(PointList.getElement(), points[i]);
 };

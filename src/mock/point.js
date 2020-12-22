@@ -80,7 +80,7 @@ const generateDate = () => {
 };
 
 const PRICE_MIN_VALUE = 10;
-const PRICE_MAX_VALUE = 10;
+const PRICE_MAX_VALUE = 100;
 
 export const generatePoint = () => {
   const offers = {};
@@ -96,3 +96,13 @@ export const generatePoint = () => {
     isFavorite: false
   };
 };
+
+export default class TripPoint {
+  constructor() {
+    this._element = null;
+  }
+
+  getTemplate() {
+    return generatePoint();
+  }
+}
