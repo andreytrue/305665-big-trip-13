@@ -1,4 +1,6 @@
-export const createInfoTemplate = (points) => {
+import {createElement} from "../utils.js";
+
+const createInfoTemplate = (points) => {
   const citiesList = points.map(function (point) {
     return point.city;
   });
@@ -27,3 +29,26 @@ export const createInfoTemplate = (points) => {
     </div>
   </section>`;
 };
+
+export default class Info {
+  constructor(points) {
+    this._points = points;
+    this._element = null;
+  }
+
+  getTemplate() {
+    return createInfoTemplate(this._points);
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+}

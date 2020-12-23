@@ -1,4 +1,6 @@
-export const createNewFormElementTemplate = (point) => {
+import {createElement} from "../utils.js";
+
+const createNewFormElementTemplate = (point) => {
   const {type, city, price, description, photo} = point;
 
   const photos = photo.map(function (picture) {
@@ -168,3 +170,26 @@ export const createNewFormElementTemplate = (point) => {
       </section>
     </form>`;
 };
+
+export default class FormCreator {
+  constructor(point) {
+    this._point = point;
+    this._element = null;
+  }
+
+  getTemplate() {
+    return createNewFormElementTemplate(this._point);
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+}

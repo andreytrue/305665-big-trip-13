@@ -1,4 +1,6 @@
-export const createFormEditorTemplate = (point) => {
+import {createElement} from "../utils.js";
+
+const createFormEditorTemplate = (point) => {
   const {type, city, price, description} = point;
 
   return `<li class="trip-events__item">
@@ -162,3 +164,26 @@ export const createFormEditorTemplate = (point) => {
     </form>
   </li>`;
 };
+
+export default class FormEditor {
+  constructor(point) {
+    this._point = point;
+    this._element = null;
+  }
+
+  getTemplate() {
+    return createFormEditorTemplate(this._point);
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+}
