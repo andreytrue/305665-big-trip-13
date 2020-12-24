@@ -1,11 +1,9 @@
 import {createElement} from "../utils.js";
 
 const createPriceTemplate = (points) => {
-  let priceSum = 0;
-
-  for (let i = 0; i < points.length; i++) {
-    priceSum += points[i].price;
-  }
+  const priceSum = points.reduce(function (sum, curr) {
+    return sum + curr.price;
+  }, 0);
 
   return `<p class="trip-info__cost">
       Total: &euro;&nbsp;<span class="trip-info__cost-value">${priceSum}</span>

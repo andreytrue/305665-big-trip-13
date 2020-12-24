@@ -8,22 +8,17 @@ const createInfoTemplate = (points) => {
   const cities = new Set(citiesList);
   const uniqCities = Array.from(cities);
 
-  const tripInfo = (citiesArray) => {
-    let tripRoute = ``;
-    for (let i = 0; i < citiesArray.length; i++) {
-      tripRoute += citiesArray[i];
-
-      if (i < citiesArray.length - 1) {
-        tripRoute += ` &mdash; `;
-      }
+  const tripInfo = uniqCities.reduce(function (prev, curr, index) {
+    if (index < uniqCities.length - 1) {
+      return prev + curr + ` &mdash; `;
+    } else {
+      return prev + curr;
     }
-
-    return tripRoute;
-  };
+  });
 
   return `<section class="trip-main__trip-info  trip-info">
     <div class="trip-info__main">
-      <h1 class="trip-info__title">${tripInfo(uniqCities)}</h1>
+      <h1 class="trip-info__title">${tripInfo}</h1>
 
       <p class="trip-info__dates">Mar 18&nbsp;&mdash;&nbsp;20</p>
     </div>
