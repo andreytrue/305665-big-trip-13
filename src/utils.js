@@ -14,8 +14,7 @@ export const render = (container, element, place) => {
       container.append(element);
       break;
     default:
-      container.append(element);
-      break;
+      throw new Error(`Unknown place to insert: '${place}'!`);
   }
 };
 
