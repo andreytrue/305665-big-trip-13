@@ -61,7 +61,7 @@ const tripInfo = document.querySelector('.trip-info');
 render(tripInfo, new Price(points).getElement(), RenderPosition.BEFOREEND);
 
 const tripControls = document.querySelector('.trip-controls');
-render(tripControls, new Menu().getElement(), RenderPosition.What);
+render(tripControls, new Menu().getElement(), RenderPosition.AFTERBEGIN);
 render(tripControls, new Filters().getElement(), RenderPosition.BEFOREEND);
 
 const tripEvents = document.querySelector('.trip-events');
