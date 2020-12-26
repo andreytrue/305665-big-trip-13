@@ -8,12 +8,8 @@ const createInfoTemplate = (points) => {
   const cities = new Set(citiesList);
   const uniqCities = Array.from(cities);
 
-  const tripInfo = uniqCities.reduce(function (prev, curr, index) {
-    if (index < uniqCities.length) {
-      return prev + ` &mdash; ` + curr;
-    } else {
-      return prev + curr;
-    }
+  const tripInfo = uniqCities.reduce(function (prev, curr) {
+    return prev + ` &mdash; ` + curr;
   });
 
   return `<section class="trip-main__trip-info  trip-info">
