@@ -7,6 +7,7 @@ import FormList from "./view/form-list.js";
 import FormCreator from "./view/form-creator.js";
 import FormEditor from "./view/form-editor.js";
 import Point from "./view/point.js";
+import noPoint from "./view/no-point.js"
 import {generatePoint} from "./mock/point.js";
 import {render, RenderPosition} from "./utils.js";
 
@@ -24,13 +25,28 @@ const renderPoint = (pointListElement, point) => {
     pointListElement.replaceChild(pointComponent.getElement(), pointEditComponent.getElement());
   };
 
+  const onEscKeyDown = (evt) => {
+    if (evt.key === `Escape` || evt.key === `Esc`) {
+      evt.preventDefault();
+      replaceEditToPoint();
+      document.removeEventListener(`keydown`, onEscKeyDown);
+    }
+  };
+
   pointComponent.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, () => {
     replacePointToEdit();
+    document.addEventListener(`keydown`, onEscKeyDown);
   });
 
   pointEditComponent.getElement().querySelector(`form`).addEventListener(`submit`, (evt) => {
     evt.preventDefault();
     replaceEditToPoint();
+    document.removeEventListener(`keydown`, onEscKeyDown);
+  });
+
+  pointEditComponent.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, (evt) => {
+    replaceEditToPoint();
+    document.removeEventListener(`keydown`, onEscKeyDown);
   });
 
   render(pointListElement, pointComponent.getElement(), RenderPosition.BEFOREEND);
@@ -51,7 +67,12 @@ render(tripControls, new Filters().getElement(), RenderPosition.BEFOREEND);
 const tripEvents = document.querySelector('.trip-events');
 const PointList = new FormList();
 render(tripEvents, new Sort().getElement(), RenderPosition.AFTERBEGIN);
-render(tripEvents, PointList.getElement(), RenderPosition.BEFOREEND);
+
+if (TASK_COUNT < 1) {
+  render(tripEvents, new noPoint().getElement(), RenderPosition.BEFOREEND);
+} else {
+  render(tripEvents, PointList.getElement(), RenderPosition.BEFOREEND);
+};
 
 const tripEventsList = document.querySelector('.trip-events__list');
 const editPoint = document.querySelectorAll('.event__rollup-btn');

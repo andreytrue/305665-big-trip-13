@@ -97,7 +97,7 @@ export const generatePoint = () => {
   };
 };
 
-export default class TripPoint {
+export default class Point {
   constructor() {
     this._element = null;
   }

@@ -13,6 +13,8 @@ export const render = (container, element, place) => {
     case RenderPosition.BEFOREEND:
       container.append(element);
       break;
+    default:
+      throw new Error(`Unknown place to insert: '${place}'!`);
   }
 };
 

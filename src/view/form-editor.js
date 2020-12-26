@@ -165,6 +165,7 @@ const createFormEditorTemplate = (point) => {
   </li>`;
 };
 
+
 export default class FormEditor {
   constructor(point) {
     this._point = point;
