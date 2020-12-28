@@ -1,4 +1,4 @@
-import {createElement} from "../utils.js";
+import AbstractView from "./abstract.js";
 
 const createNewFormElementTemplate = (point) => {
   const {type, city, price, description, photo} = point;
@@ -171,25 +171,13 @@ const createNewFormElementTemplate = (point) => {
     </form>`;
 };
 
-export default class FormCreator {
+export default class FormCreator extends AbstractView {
   constructor(point) {
+    super();
     this._point = point;
-    this._element = null;
   }
 
   getTemplate() {
     return createNewFormElementTemplate(this._point);
-  }
-
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
   }
 }
