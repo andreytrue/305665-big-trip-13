@@ -1,4 +1,4 @@
-import {createElement} from "../utils.js";
+import AbstractView from "./abstract.js";
 
 const createInfoTemplate = (points) => {
   const citiesList = points.map(function (point) {
@@ -8,12 +8,8 @@ const createInfoTemplate = (points) => {
   const cities = new Set(citiesList);
   const uniqCities = Array.from(cities);
 
-  const tripInfo = uniqCities.reduce(function (prev, curr, index) {
-    if (index < uniqCities.length) {
-      return prev + ` &mdash; ` + curr;
-    } else {
-      return prev + curr;
-    }
+  const tripInfo = uniqCities.reduce((prev, curr) => {
+    return prev + ` &mdash; ` + curr;
   });
 
   return `<section class="trip-main__trip-info  trip-info">
@@ -25,25 +21,13 @@ const createInfoTemplate = (points) => {
   </section>`;
 };
 
-export default class Info {
+export default class Info extends AbstractView {
   constructor(points) {
+    super();
     this._points = points;
-    this._element = null;
   }
 
   getTemplate() {
     return createInfoTemplate(this._points);
-  }
-
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
   }
 }

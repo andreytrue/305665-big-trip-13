@@ -1,4 +1,4 @@
-import {createElement} from "../utils.js";
+import AbstractView from "./abstract.js";
 
 const createFormEditorTemplate = (point) => {
   const {type, city, price, description} = point;
@@ -166,25 +166,36 @@ const createFormEditorTemplate = (point) => {
 };
 
 
-export default class FormEditor {
+export default class FormEditor extends AbstractView {
   constructor(point) {
+    super();
     this._point = point;
-    this._element = null;
+
+    this._formSubmitHandler = this._formSubmitHandler.bind(this);
+    this._pointClickHandler = this._pointClickHandler.bind(this);
   }
 
   getTemplate() {
     return createFormEditorTemplate(this._point);
   }
 
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
+  _formSubmitHandler(evt) {
+    evt.preventDefault();
+    this._callback.formSubmit();
   }
 
-  removeElement() {
-    this._element = null;
+  _pointClickHandler(evt) {
+    evt.preventDefault();
+    this._callback.editClick();
+  }
+
+  setFormSubmitHandler(callback) {
+    this._callback.formSubmit = callback;
+    this.getElement().querySelector(`form`).addEventListener(`submit`, this._formSubmitHandler);
+  }
+
+  setPointClickHandler(callback) {
+    this._callback.editClick = callback;
+    this.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, this._pointClickHandler);
   }
 }
