@@ -1,6 +1,7 @@
 import dayjs from "dayjs";
 import {getRandomInteger} from "../utils/common.js";
 
+const generateId = () => Date.now() + parseInt(Math.random() * 10000, 10);
 
 const generateType = () => {
   const type = [
@@ -81,6 +82,7 @@ export const generatePoint = () => {
   const offers = {};
 
   return {
+    id: generateId(),
     type: generateType(),
     city: generateEndlessCity(),
     date: generateDate(),
