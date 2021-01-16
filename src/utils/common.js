@@ -40,19 +40,6 @@ export const getEventDuration = (startDate, endDate) => {
     ${addZeroToNumber(minutes)}M`;
 };
 
-export const sortWaypointsByTime = (itemsA, itemsB) => {
-  const timeDurationItemsA = itemsA.dateEnd.diff(itemsA.dateStart, `m`);
-  const timeDurationItemsB = itemsB.dateEnd.diff(itemsB.dateStart, `m`);
-
-  if (timeDurationItemsB > timeDurationItemsA) {
-    return 1;
-  }
-  if (timeDurationItemsB < timeDurationItemsA) {
-    return -1;
-  }
-  return 0;
-};
-
 export const sortPrice = (prevPoint, nextPoint) => nextPoint.price - prevPoint.price;
 
 export const sortTime = (prevPoint, nextPoint) => {
