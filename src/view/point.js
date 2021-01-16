@@ -1,7 +1,11 @@
 import AbstractView from "./abstract.js";
 
 const createPointTemplate = (point) => {
-  const {type, city, price} = point;
+  const {type, city, price, isFavorite} = point;
+
+  const favoriteClassName = isFavorite
+    ? `event__favorite-btn event__favorite-btn--active`
+    : `event__favorite-btn`;
 
   return `<li class="trip-events__item">
     <div class="event">
@@ -34,7 +38,7 @@ const createPointTemplate = (point) => {
           <span class="event__offer-price">100</span>
         </li>
       </ul>
-      <button class="event__favorite-btn" type="button">
+      <button class="${favoriteClassName}" type="button">
         <span class="visually-hidden">Add to favorite</span>
         <svg class="event__favorite-icon" width="28" height="28" viewBox="0 0 28 28">
           <path d="M14 21l-8.22899 4.3262 1.57159-9.1631L.685209 9.67376 9.8855 8.33688 14 0l4.1145 8.33688 9.2003 1.33688-6.6574 6.48934 1.5716 9.1631L14 21z"/>
@@ -53,6 +57,7 @@ export default class Point extends AbstractView {
     this._point = point;
 
     this._editClickHandler = this._editClickHandler.bind(this);
+    this._favoriteClickHandler = this._favoriteClickHandler.bind(this);
   }
 
   getTemplate() {
@@ -67,5 +72,15 @@ export default class Point extends AbstractView {
   setEditClickHandler(callback) {
     this._callback.editClick = callback;
     this.getElement().querySelector(`.event__rollup-btn`).addEventListener(`click`, this._editClickHandler);
+  }
+
+  _favoriteClickHandler(evt) {
+    evt.preventDefault();
+    this._callback.favoriteClick();
+  }
+
+  setFavoriteClickHandler(callback) {
+    this._callback.favoriteClick = callback;
+    this.getElement().querySelector(`.event__favorite-btn`).addEventListener(`click`, this._favoriteClickHandler);
   }
 }
