@@ -1,6 +1,20 @@
 import dayjs from "dayjs";
 import {getRandomInteger} from "../utils/common.js";
 
+const SENTENCE_MIN_LENGTH = 1;
+const SENTENCE_MAX_LENGTH = 5;
+const PHOTOS_MIN_AMOUNT = 1;
+const PHOTOS_MAX_AMOUNT = 5;
+const PRICE_MIN_VALUE = 100;
+const PRICE_MAX_VALUE = 1000;
+const TITLE_TEXT = [`Add luggage`, `Switch to comfort class`, `Add meal`, `Choose seats`, `Travel by train`];
+const PRICE_MIN_OFFER = 10;
+const PRICE_MAX_OFFER = 100;
+const OFFERS_MAX_AMOUNT = 5;
+const DATE_MAX_MINUTES = 60;
+const DATE_MAX_HOURS = 24;
+const DATE_MAX_DAYS = 2;
+
 const generateId = () => Date.now() + parseInt(Math.random() * 10000, 10);
 
 const generateType = () => {
@@ -22,9 +36,6 @@ const generateEndlessCity = () => {
 
   return city[randomIndex];
 };
-
-const SENTENCE_MIN_LENGTH = 1;
-const SENTENCE_MAX_LENGTH = 5;
 
 const generateDescription = () => {
   const description = [
@@ -52,9 +63,6 @@ const generateDescription = () => {
   return pointDescription;
 };
 
-const PHOTOS_MIN_AMOUNT = 1;
-const PHOTOS_MAX_AMOUNT = 5;
-
 const generatePhoto = () => {
   const photos = [];
   const randomAmount = getRandomInteger(PHOTOS_MIN_AMOUNT, PHOTOS_MAX_AMOUNT);
@@ -67,29 +75,48 @@ const generatePhoto = () => {
   return photos;
 };
 
-const generateDate = () => {
-  const maxDaysGap = 4;
-  const daysGap = getRandomInteger(-maxDaysGap, maxDaysGap);
-  const isDate = dayjs().add(daysGap, `day`).toDate();
+const generateOffer = () => {
+  const randomSizeOffer = getRandomInteger(1, OFFERS_MAX_AMOUNT);
+  let offers = [];
 
-  return dayjs(isDate).format(`DD/MM/YYYY:H:m`);
+  for (let i = 0; i < randomSizeOffer; i++) {
+    offers.push({
+      price: getRandomInteger(PRICE_MIN_OFFER, PRICE_MAX_OFFER),
+      title: TITLE_TEXT[i]
+    });
+  }
+
+  return offers;
 };
 
-const PRICE_MIN_VALUE = 10;
-const PRICE_MAX_VALUE = 100;
+let startEvent = dayjs();
+
+const getDate = () => {
+  const days = getRandomInteger(0, DATE_MAX_DAYS);
+  const hours = getRandomInteger(0, DATE_MAX_HOURS);
+  const minutes = getRandomInteger(0, DATE_MAX_MINUTES);
+
+  const start = startEvent;
+  const finish = startEvent.add(days, `d`).add(hours, `h`).add(minutes, `m`);
+
+  startEvent = finish;
+
+  return {
+    start,
+    finish,
+  };
+};
 
 export const generatePoint = () => {
-  const offers = {};
-
   return {
     id: generateId(),
     type: generateType(),
     city: generateEndlessCity(),
-    date: generateDate(),
+    date: getDate(),
     price: getRandomInteger(PRICE_MIN_VALUE, PRICE_MAX_VALUE),
     description: generateDescription(),
     photo: generatePhoto(),
-    offers,
+    offers: generateOffer(),
     isFavorite: false
   };
 };
