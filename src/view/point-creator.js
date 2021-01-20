@@ -50,37 +50,36 @@ export const createDestinationTemplate = (description, photos) => {
   return ``;
 };
 
-const createOfferTemplate = (offer, index) => {
-  const {title, name, price, checked} = offer;
-  const id = `event-offer-${title}-${index}`;
-
-  return (
-    `<div class="event__offer-selector">
-      <input 
-        class="event__offer-checkbox  visually-hidden" 
-        id="${id}" 
-        type="checkbox" 
-        name="event-offer-${title}"
-        ${checked ? `checked` : ``}
-      >
-      <label class="event__offer-label" for="${id}">
-        <span class="event__offer-title">${name}</span>
-        &plus;&euro;&nbsp;
-        <span class="event__offer-price">${price}</span>
-      </label>
-    </div>`
-  );
+const createOfferTemplate = (offers) => {
+  offers.map((offer, index) => {
+    const {title, name, price, checked} = offer;
+    const id = `event-offer-${title}-${index}`;
+    return (
+      `<div class="event__offer-selector">
+        <input 
+          class="event__offer-checkbox  visually-hidden" 
+          id="${id}" 
+          type="checkbox" 
+          name="event-offer-${title}"
+          ${checked ? `checked` : ``}
+        >
+        <label class="event__offer-label" for="${id}">
+          <span class="event__offer-title">${name}</span>
+          &plus;&euro;&nbsp;
+          <span class="event__offer-price">${price}</span>
+        </label>
+      </div>`
+    );
+  }).join(``);
 };
 
-const createOffersTemplate = (offers) => {
+export const createOffersTemplate = (offers) => {
   return (
     `<section class="event__section  event__section--offers">
       <h3 class="event__section-title  event__section-title--offers">Offers</h3>
       <div class="event__available-offers">
-      ${offers.map((offer, index) => {
-      return (createOfferTemplate(offer, index));
-    }).join(``)}
-    </div>
+        ${createOfferTemplate(offers)}
+      </div>
     </section>`
   );
 };
