@@ -1,41 +1,18 @@
-import {createPointTypeListTemplate, createCitiesTemplate, createPhotosTemplate, createDestinationTemplate} from "./point-creator.js";
+import dayjs from "dayjs";
+import flatpickr from "flatpickr";
+import {createPointTypeListTemplate, createCitiesTemplate, createPhotosTemplate, createDestinationTemplate, createOffersTemplate} from "./point-creator.js";
 import SmartView from "../utils/smart.js";
 
-const createOfferTemplate = (offers) => {
-  return (
-    `<section class="event__section  event__section--offers">
-      <h3 class="event__section-title  event__section-title--offers">Offers</h3>
-      <div class="event__available-offers">
-      ${offers.map((offer, index) => {
-      const {title, name, price, checked} = offer;
-      const id = `event-offer-${title}-${index}`;
-      return (
-        `<div class="event__offer-selector">
-          <input 
-            class="event__offer-checkbox  visually-hidden" 
-            id="${id}" 
-            type="checkbox" 
-            name="event-offer-${title}"
-            ${checked ? `checked` : ``}
-          >
-          <label class="event__offer-label" for="${id}">
-            <span class="event__offer-title">${name}</span>
-            &plus;&euro;&nbsp;
-            <span class="event__offer-price">${price}</span>
-          </label>
-        </div>`
-      );
-    }).join(``)}
-    </div>
-    </section>`
-  );
-};
+import "../../node_modules/flatpickr/dist/flatpickr.min.css";
 
 const createFormEditorTemplate = (point) => {
-  const {POINT_TYPES, type, city, price, destinations, offerType} = point;
+  const {POINT_TYPES, type, city, price, destinations, offerType, date: {start, finish}} = point;
   const destinationCities = createCitiesTemplate(destinations);
   const descriptionForThisCity = destinations.find((destination) => destination.city === city);
   const photoTemplate = descriptionForThisCity.photos.length ? createPhotosTemplate(descriptionForThisCity.photos) : ``;
+
+  const startTimeFull = dayjs(start).format(`YYYY-MM-DD HH:mm`);
+  const endTimeFull = dayjs(finish).format(`YYYY-MM-DD HH:mm`);
 
   return `<li class="trip-events__item">
     <form class="event event--edit" action="#" method="post">
@@ -67,10 +44,10 @@ const createFormEditorTemplate = (point) => {
 
         <div class="event__field-group  event__field-group--time">
           <label class="visually-hidden" for="event-start-time-1">From</label>
-          <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="18/03/19 12:25">
+          <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${startTimeFull}">
           &mdash;
           <label class="visually-hidden" for="event-end-time-1">To</label>
-          <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="18/03/19 13:35">
+          <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${endTimeFull}">
         </div>
 
         <div class="event__field-group  event__field-group--price">
@@ -88,7 +65,7 @@ const createFormEditorTemplate = (point) => {
         </button>
       </header>
       <section class="event__details">
-        ${offerType.length ? createOfferTemplate(offerType) : ``}
+        ${offerType.length ? createOffersTemplate(offerType) : ``}
         ${createDestinationTemplate(descriptionForThisCity.description, photoTemplate)}
       </section>
     </form>
@@ -100,6 +77,8 @@ export default class FormEditor extends SmartView {
   constructor(point) {
     super();
     this._data = FormEditor.parsePointToData(point);
+    this._datepickerStartDate = null;
+    this._datepickerEndDate = null;
 
     this._formSubmitHandler = this._formSubmitHandler.bind(this);
     this._pointClickHandler = this._pointClickHandler.bind(this);
@@ -109,7 +88,11 @@ export default class FormEditor extends SmartView {
     this._priceHandler = this._priceHandler.bind(this);
     this._offersHandler = this._offersHandler.bind(this);
 
+    this._startDateChangeHandler = this._startDateChangeHandler.bind(this);
+    this._endDateChangeHandler = this._endDateChangeHandler.bind(this);
+
     this._setInnerHandlers();
+    this._setDatepicker();
   }
 
   getTemplate() {
@@ -172,6 +155,7 @@ export default class FormEditor extends SmartView {
 
   restoreHandlers() {
     this._setInnerHandlers();
+    this._setDatepicker();
     this.setFormCloseHandler(this._callback.formClose);
     this.setFormSubmitHandler(this._callback.formSubmit);
   }
@@ -234,6 +218,56 @@ export default class FormEditor extends SmartView {
         .querySelector(`.event__available-offers`)
         .addEventListener(`change`, this._offersHandler);
     }
+  }
+
+  _setDatepicker() {
+    if (this._datepickerStartDate) {
+      this._datepickerStartDate.destroy();
+      this._datepickerStartDate = null;
+    }
+
+    if (this._datepickerEndDate) {
+      this._datepickerEndDate.destroy();
+      this._datepickerEndDate = null;
+    }
+
+    this._datepickerStartDate = flatpickr(
+        this.getElement().querySelector(`#event-start-time-1`),
+        {
+          dateFormat: `d/m/Y H:i`,
+          defaultDate: this._data.date.start.toDate(),
+          onChange: this._startDateChangeHandler
+        }
+    );
+
+    this._datepickerEndDate = flatpickr(
+        this.getElement().querySelector(`#event-end-time-1`),
+        {
+          dateFormat: `d/m/Y H:i`,
+          defaultDate: this._data.date.finish.toDate(),
+          onChange: this._endDateChangeHandler
+        }
+    );
+  }
+
+  _startDateChangeHandler(userDate) {
+    this.updateData({
+      date: {
+        start: dayjs(userDate),
+        finish: dayjs(userDate),
+      },
+    }, true);
+    this._startDatepicker.set(userDate);
+    this._endDatepicker.set(`minDate`, this._data.date.start.toDate());
+  }
+
+  _endDateChangeHandler(userDate) {
+    this.updateData({
+      date: {
+        start: this._data.date.start,
+        finish: dayjs(userDate),
+      },
+    }, true);
   }
 
   reset(point) {
