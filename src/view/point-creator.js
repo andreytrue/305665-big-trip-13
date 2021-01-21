@@ -1,5 +1,6 @@
-import {getRandomInteger} from "../utils/common.js";
 import SmartView from "../utils/smart.js";
+import dayjs from 'dayjs';
+import flatpickr from 'flatpickr';
 
 export const createPointTypeListTemplate = (eventType, isChecked) => {
   const pointTypeLowerCase = eventType.toLowerCase();
@@ -50,28 +51,34 @@ export const createDestinationTemplate = (description, photos) => {
 };
 
 const createOfferTemplate = (offers) => {
+  offers.map((offer, index) => {
+    const {title, name, price, checked} = offer;
+    const id = `event-offer-${title}-${index}`;
+    return (
+      `<div class="event__offer-selector">
+        <input 
+          class="event__offer-checkbox  visually-hidden" 
+          id="${id}" 
+          type="checkbox" 
+          name="event-offer-${title}"
+          ${checked ? `checked` : ``}
+        >
+        <label class="event__offer-label" for="${id}">
+          <span class="event__offer-title">${name}</span>
+          &plus;&euro;&nbsp;
+          <span class="event__offer-price">${price}</span>
+        </label>
+      </div>`
+    );
+  }).join(``);
+};
+
+export const createOffersTemplate = (offers) => {
   return (
     `<section class="event__section  event__section--offers">
       <h3 class="event__section-title  event__section-title--offers">Offers</h3>
       <div class="event__available-offers">
-      ${offers.map((offer, index) => {
-      const {title, name, price} = offer;
-      const id = `event-offer-${title}-${index}`;
-      return (
-        `<div class="event__offer-selector">
-          <input class="event__offer-checkbox  visually-hidden" 
-          id="${id}" 
-          type="checkbox" 
-          name="event-offer-${title}"
-          ${getRandomInteger(0, 1) ? `checked` : ``}>
-          <label class="event__offer-label" for="${id}">
-            <span class="event__offer-title">${name}</span>
-            &plus;&euro;&nbsp;
-            <span class="event__offer-price">${price}</span>
-          </label>
-        </div>`
-      );
-    }).join(``)}
+        ${createOfferTemplate(offers)}
       </div>
     </section>`
   );
@@ -181,7 +188,7 @@ const createNewFormElementTemplate = (point) => {
         <button class="event__reset-btn" type="reset">Cancel</button>
       </header>
       <section class="event__details">
-        ${type.length ? createOfferTemplate(type) : ``}
+        ${type.length ? createOffersTemplate(type) : ``}
         ${createDestinationTemplate(descriptionForThisCity.description, photoTemplate)}      
       </section>
     </form>`;
@@ -198,7 +205,11 @@ export default class FormCreator extends SmartView {
     this._distinationHandler = this._distinationHandler.bind(this);
     this._offersHandler = this._offersHandler.bind(this);
 
+    this._startDateChangeHandler = this._startDateChangeHandler.bind(this);
+    this._endDateChangeHandler = this._endDateChangeHandler.bind(this);
+
     this._setInnerHandlers();
+    this._setDatepicker();
   }
 
   getTemplate() {
@@ -261,6 +272,7 @@ export default class FormCreator extends SmartView {
 
   restoreHandlers() {
     this._setInnerHandlers();
+    this._setDatepicker();
     this.setFormCloseHandler(this._callback.formClose);
     this.setFormSubmitHandler(this._callback.formSubmit);
   }
@@ -315,6 +327,56 @@ export default class FormCreator extends SmartView {
         .querySelector(`.event__available-offers`)
         .addEventListener(`change`, this._offersHandler);
     }
+  }
+
+  _setDatepicker() {
+    if (this._datepickerStartDate) {
+      this._datepickerStartDate.destroy();
+      this._datepickerStartDate = null;
+    }
+
+    if (this._datepickerEndDate) {
+      this._datepickerEndDate.destroy();
+      this._datepickerEndDate = null;
+    }
+
+    this._datepickerStartDate = flatpickr(
+        this.getElement().querySelector(`#event-start-time-1`),
+        {
+          dateFormat: `d/m/Y H:i`,
+          defaultDate: this._data.date.start.toDate(),
+          onChange: this._startDateChangeHandler
+        }
+    );
+
+    this._datepickerEndDate = flatpickr(
+        this.getElement().querySelector(`#event-end-time-1`),
+        {
+          dateFormat: `d/m/Y H:i`,
+          defaultDate: this._data.date.finish.toDate(),
+          onChange: this._endDateChangeHandler
+        }
+    );
+  }
+
+  _startDateChangeHandler(userDate) {
+    this.updateData({
+      date: {
+        start: dayjs(userDate),
+        finish: dayjs(userDate),
+      },
+    }, true);
+    this._startDatepicker.set(userDate);
+    this._endDatepicker.set(`minDate`, this._data.date.start.toDate());
+  }
+
+  _endDateChangeHandler(userDate) {
+    this.updateData({
+      date: {
+        start: this._data.date.start,
+        finish: dayjs(userDate),
+      },
+    }, true);
   }
 
   reset(point) {
