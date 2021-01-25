@@ -1,5 +1,6 @@
 import dayjs from "dayjs";
-import flatpickr from "flatpickr";
+import flatpickr from 'flatpickr';
+import he from 'he';
 import {createPointTypeListTemplate, createCitiesTemplate, createPhotosTemplate, createDestinationTemplate, createOffersTemplate} from "./point-creator.js";
 import SmartView from "../utils/smart.js";
 
@@ -36,7 +37,7 @@ const createFormEditorTemplate = (point) => {
           <label class="event__label  event__type-output" for="event-destination-1">
             ${type}
           </label>
-          <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${city}" list="destination-list-1">
+          <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${he.encode(city)}" list="destination-list-1">
           <datalist id="destination-list-1">
             ${destinationCities}
           </datalist>
@@ -87,6 +88,7 @@ export default class FormEditor extends SmartView {
     this._destinationHandler = this._destinationHandler.bind(this);
     this._priceHandler = this._priceHandler.bind(this);
     this._offersHandler = this._offersHandler.bind(this);
+    this._formDeleteClickHandler = this._formDeleteClickHandler.bind(this);
 
     this._startDateChangeHandler = this._startDateChangeHandler.bind(this);
     this._endDateChangeHandler = this._endDateChangeHandler.bind(this);
@@ -158,6 +160,7 @@ export default class FormEditor extends SmartView {
     this._setDatepicker();
     this.setFormCloseHandler(this._callback.formClose);
     this.setFormSubmitHandler(this._callback.formSubmit);
+    this.setDeleteClickHandler(this._callback.deleteClick);
   }
 
   setFormCloseHandler(callback) {
@@ -257,8 +260,8 @@ export default class FormEditor extends SmartView {
         finish: dayjs(userDate),
       },
     }, true);
-    this._startDatepicker.set(userDate);
-    this._endDatepicker.set(`minDate`, this._data.date.start.toDate());
+    this._datepickerStartDate.set(userDate);
+    this._datepickerEndDate.set(`minDate`, this._data.date.start.toDate());
   }
 
   _endDateChangeHandler(userDate) {
@@ -268,6 +271,32 @@ export default class FormEditor extends SmartView {
         finish: dayjs(userDate),
       },
     }, true);
+  }
+
+  _formDeleteClickHandler(evt) {
+    evt.preventDefault();
+    this._callback.deleteClick(FormEditor.parseDataToPoint(this._data));
+  }
+
+  setDeleteClickHandler(callback) {
+    this._callback.deleteClick = callback;
+    this.getElement()
+      .querySelector(`.event__reset-btn`)
+      .addEventListener(`click`, this._formDeleteClickHandler);
+  }
+
+  removeElement() {
+    super.removeElement();
+
+    if (this._datepickerStartDate) {
+      this._datepickerStartDate.destroy();
+      this._datepickerStartDate = null;
+    }
+
+    if (this._datepickerEndDate) {
+      this._datepickerEndDate.destroy();
+      this._datepickerEndDate = null;
+    }
   }
 
   reset(point) {
