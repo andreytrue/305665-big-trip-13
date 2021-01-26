@@ -1,6 +1,7 @@
 import SmartView from "../utils/smart.js";
 import dayjs from 'dayjs';
 import flatpickr from 'flatpickr';
+import {DEFAULT_POINT} from "../mock/point.js";
 
 export const createPointTypeListTemplate = (eventType, isChecked) => {
   const pointTypeLowerCase = eventType.toLowerCase();
@@ -51,9 +52,10 @@ export const createDestinationTemplate = (description, photos) => {
 };
 
 const createOfferTemplate = (offers) => {
-  offers.map((offer, index) => {
+  const offerTemplate = offers.map((offer, index) => {
     const {title, name, price, checked} = offer;
     const id = `event-offer-${title}-${index}`;
+
     return (
       `<div class="event__offer-selector">
         <input 
@@ -71,6 +73,8 @@ const createOfferTemplate = (offers) => {
       </div>`
     );
   }).join(``);
+
+  return offerTemplate;
 };
 
 export const createOffersTemplate = (offers) => {
@@ -85,11 +89,13 @@ export const createOffersTemplate = (offers) => {
 };
 
 const createNewFormElementTemplate = (point) => {
-  const {type, cities, city, price, destinations} = point;
-  const destinationCities = createCitiesTemplate(cities);
-  const defaultCity = destinations.city[0];
-  const descriptionForThisCity = destinations.find(({location}) => location === defaultCity);
+  const {POINT_TYPES, type, city, price, destinations, offerType, date: {start, finish}} = point;
+  const destinationCities = createCitiesTemplate(destinations);
+  const descriptionForThisCity = destinations.find((destination) => destination.city === city);
   const photoTemplate = descriptionForThisCity.photos.length ? createPhotosTemplate(descriptionForThisCity.photos) : ``;
+
+  const startTimeFull = dayjs(start).format(`YYYY-MM-DD HH:mm`);
+  const endTimeFull = dayjs(finish).format(`YYYY-MM-DD HH:mm`);
 
   return `<li class="trip-events__item">
     <form class="event event--edit" action="#" method="post">
@@ -97,63 +103,14 @@ const createNewFormElementTemplate = (point) => {
         <div class="event__type-wrapper">
           <label class="event__type  event__type-btn" for="event-type-toggle-1">
             <span class="visually-hidden">Choose event type</span>
-            <img class="event__type-icon" width="17" height="17" src="img/icons/${type}.png" alt="Event type icon">
+            <img class="event__type-icon" width="17" height="17" src="img/icons/${type.toLowerCase()}.png" alt="Event type icon">
           </label>
           <input class="event__type-toggle  visually-hidden" id="event-type-toggle-1" type="checkbox">
 
           <div class="event__type-list">
             <fieldset class="event__type-group">
               <legend class="visually-hidden">Event type</legend>
-
-              <div class="event__type-item">
-                <input id="event-type-taxi-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="taxi">
-                <label class="event__type-label  event__type-label--taxi" for="event-type-taxi-1">Taxi</label>
-              </div>
-
-              <div class="event__type-item">
-                <input id="event-type-bus-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="bus">
-                <label class="event__type-label  event__type-label--bus" for="event-type-bus-1">Bus</label>
-              </div>
-
-              <div class="event__type-item">
-                <input id="event-type-train-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="train">
-                <label class="event__type-label  event__type-label--train" for="event-type-train-1">Train</label>
-              </div>
-
-              <div class="event__type-item">
-                <input id="event-type-ship-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="ship">
-                <label class="event__type-label  event__type-label--ship" for="event-type-ship-1">Ship</label>
-              </div>
-
-              <div class="event__type-item">
-                <input id="event-type-transport-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="transport">
-                <label class="event__type-label  event__type-label--transport" for="event-type-transport-1">Transport</label>
-              </div>
-
-              <div class="event__type-item">
-                <input id="event-type-drive-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="drive">
-                <label class="event__type-label  event__type-label--drive" for="event-type-drive-1">Drive</label>
-              </div>
-
-              <div class="event__type-item">
-                <input id="event-type-flight-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="flight" checked>
-                <label class="event__type-label  event__type-label--flight" for="event-type-flight-1">Flight</label>
-              </div>
-
-              <div class="event__type-item">
-                <input id="event-type-check-in-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="check-in">
-                <label class="event__type-label  event__type-label--check-in" for="event-type-check-in-1">Check-in</label>
-              </div>
-
-              <div class="event__type-item">
-                <input id="event-type-sightseeing-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="sightseeing">
-                <label class="event__type-label  event__type-label--sightseeing" for="event-type-sightseeing-1">Sightseeing</label>
-              </div>
-
-              <div class="event__type-item">
-                <input id="event-type-restaurant-1" class="event__type-input  visually-hidden" type="radio" name="event-type" value="restaurant">
-                <label class="event__type-label  event__type-label--restaurant" for="event-type-restaurant-1">Restaurant</label>
-              </div>
+              ${POINT_TYPES.map((elem) => createPointTypeListTemplate(elem, elem.toLowerCase() === type.toLowerCase())).join(``)}
             </fieldset>
           </div>
         </div>
@@ -170,40 +127,49 @@ const createNewFormElementTemplate = (point) => {
 
         <div class="event__field-group  event__field-group--time">
           <label class="visually-hidden" for="event-start-time-1">From</label>
-          <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="19/03/19 00:00">
+          <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${startTimeFull}">
           &mdash;
           <label class="visually-hidden" for="event-end-time-1">To</label>
-          <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="19/03/19 00:00">
+          <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${endTimeFull}">
         </div>
 
         <div class="event__field-group  event__field-group--price">
           <label class="event__label" for="event-price-1">
             <span class="visually-hidden">Price</span>
-            ${`&euro; ` + price}
+            &euro;
           </label>
-          <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="">
+          <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${price}">
         </div>
 
         <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-        <button class="event__reset-btn" type="reset">Cancel</button>
+        <button class="event__reset-btn" type="reset">Delete</button>
+        <button class="event__rollup-btn" type="button">
+          <span class="visually-hidden">Open event</span>
+        </button>
       </header>
       <section class="event__details">
-        ${type.length ? createOffersTemplate(type) : ``}
-        ${createDestinationTemplate(descriptionForThisCity.description, photoTemplate)}      
+        ${offerType.length ? createOffersTemplate(offerType) : ``}
+        ${createDestinationTemplate(descriptionForThisCity.description, photoTemplate)}
       </section>
-    </form>`;
+    </form>
+  </li>`;
 };
 
 export default class FormCreator extends SmartView {
-  constructor(point) {
+  constructor(point = DEFAULT_POINT) {
     super();
     this._data = FormCreator.parsePointToData(point);
+    this._datepickerStartDate = null;
+    this._datepickerEndDate = null;
 
     this._formSubmitHandler = this._formSubmitHandler.bind(this);
+    this._pointClickHandler = this._pointClickHandler.bind(this);
     this._setFormCloseHandler = this._setFormCloseHandler.bind(this);
     this._eventTypeHandler = this._eventTypeHandler.bind(this);
-    this._distinationHandler = this._distinationHandler.bind(this);
+    this._destinationHandler = this._destinationHandler.bind(this);
+    this._priceHandler = this._priceHandler.bind(this);
     this._offersHandler = this._offersHandler.bind(this);
+    this._formDeleteClickHandler = this._formDeleteClickHandler.bind(this);
 
     this._startDateChangeHandler = this._startDateChangeHandler.bind(this);
     this._endDateChangeHandler = this._endDateChangeHandler.bind(this);
@@ -213,12 +179,13 @@ export default class FormCreator extends SmartView {
   }
 
   getTemplate() {
-    return createNewFormElementTemplate(this._point);
+    return createNewFormElementTemplate(this._data);
   }
 
   static parsePointToData(point) {
     const offers = JSON.parse(JSON.stringify(point.offers));
     const offerType = offers.filter((offer) => offer.id.toLowerCase() === point.type.toLowerCase());
+
     return Object.assign(
         {},
         point,
@@ -273,8 +240,9 @@ export default class FormCreator extends SmartView {
   restoreHandlers() {
     this._setInnerHandlers();
     this._setDatepicker();
-    this.setFormCloseHandler(this._callback.formClose);
+    // this.setFormCloseHandler(this._callback.formClose);
     this.setFormSubmitHandler(this._callback.formSubmit);
+    this.setDeleteClickHandler(this._callback.deleteClick);
   }
 
   setFormCloseHandler(callback) {
@@ -307,6 +275,11 @@ export default class FormCreator extends SmartView {
     }
   }
 
+  _priceHandler(evt) {
+    evt.preventDefault();
+    this.updateData({price: evt.target.value}, true);
+  }
+
   _offersHandler(evt) {
     evt.preventDefault();
     const offerElement = this._data.offers.find(({title}) => evt.target.name.includes(title));
@@ -321,6 +294,9 @@ export default class FormCreator extends SmartView {
     this.getElement()
       .querySelector(`.event__input--destination`)
       .addEventListener(`input`, this._destinationHandler);
+    this.getElement()
+      .querySelector(`.event__input--price`)
+      .addEventListener(`input`, this._priceHandler);
 
     if (this._data.offerType.length) {
       this.getElement()
@@ -366,8 +342,8 @@ export default class FormCreator extends SmartView {
         finish: dayjs(userDate),
       },
     }, true);
-    this._startDatepicker.set(userDate);
-    this._endDatepicker.set(`minDate`, this._data.date.start.toDate());
+    this._datepickerStartDate.set(userDate);
+    this._datepickerEndDate.set(`minDate`, this._data.date.start.toDate());
   }
 
   _endDateChangeHandler(userDate) {
@@ -377,6 +353,32 @@ export default class FormCreator extends SmartView {
         finish: dayjs(userDate),
       },
     }, true);
+  }
+
+  _formDeleteClickHandler(evt) {
+    evt.preventDefault();
+    this._callback.deleteClick(FormCreator.parseDataToPoint(this._data));
+  }
+
+  setDeleteClickHandler(callback) {
+    this._callback.deleteClick = callback;
+    this.getElement()
+      .querySelector(`.event__reset-btn`)
+      .addEventListener(`click`, this._formDeleteClickHandler);
+  }
+
+  removeElement() {
+    super.removeElement();
+
+    if (this._datepickerStartDate) {
+      this._datepickerStartDate.destroy();
+      this._datepickerStartDate = null;
+    }
+
+    if (this._datepickerEndDate) {
+      this._datepickerEndDate.destroy();
+      this._datepickerEndDate = null;
+    }
   }
 
   reset(point) {

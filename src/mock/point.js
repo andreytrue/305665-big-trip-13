@@ -13,7 +13,7 @@ const DATE_MAX_MINUTES = 60;
 const DATE_MAX_HOURS = 24;
 const DATE_MAX_DAYS = 2;
 
-const generateId = () => Date.now() + parseInt(Math.random() * 10000, 10);
+export const generateId = () => Date.now() + parseInt(Math.random() * 10000, 10);
 
 const generateType = () => {
   const randomIndex = getRandomInteger(0, POINT_TYPES.length - 1);
@@ -82,7 +82,7 @@ const generateOffers = () => {
   return offerTypes;
 };
 
-let startEvent = dayjs();
+let startEvent = dayjs().subtract(180, `h`);
 
 const getDate = () => {
   const days = getRandomInteger(0, DATE_MAX_DAYS);
@@ -100,10 +100,14 @@ const getDate = () => {
   };
 };
 
-export const generatePoint = () => {
+const getDestinations = () => {
   const destinations = [];
   CITIES.forEach((city) => destinations.push({city, description: generateDescription(), photos: generatePhoto()}));
 
+  return destinations;
+};
+
+export const generatePoint = () => {
   return {
     id: generateId(),
     POINT_TYPES,
@@ -115,13 +119,30 @@ export const generatePoint = () => {
       description: generateDescription(),
       photos: generatePhoto()
     },
-    destinations,
+    destinations: getDestinations(),
     date: getDate(),
     price: getRandomInteger(PRICE_MIN_VALUE, PRICE_MAX_VALUE),
     photo: generatePhoto(),
     offers: generateOffers(),
     isFavorite: false
   };
+};
+
+export const DEFAULT_POINT = {
+  price: `0`,
+  CITIES,
+  city: generateEndlessCity(),
+  POINT_TYPES,
+  type: POINT_TYPES[0],
+  offers: generateOffers(),
+  pointEventType: generateType(),
+  destinations: getDestinations(),
+  destination: getDestinations()[0],
+  date: {
+    start: dayjs(),
+    finish: dayjs(),
+  },
+  isFavorite: false,
 };
 
 export default class Point {

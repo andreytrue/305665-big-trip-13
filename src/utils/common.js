@@ -9,20 +9,6 @@ export const getRandomInteger = (a = 0, b = 1) => {
   return Math.floor(lower + Math.random() * (upper - lower + 1));
 };
 
-export const updateItem = (items, update) => {
-  const index = items.findIndex((item) => item.id === update.id);
-
-  if (index === -1) {
-    return items;
-  }
-
-  return [
-    ...items.slice(0, index),
-    update,
-    ...items.slice(index + 1)
-  ];
-};
-
 const addZeroToNumber = (number) => {
   return (number < 10 ? `0${number}` : number);
 };
@@ -44,4 +30,18 @@ export const sortPrice = (prevPoint, nextPoint) => nextPoint.price - prevPoint.p
 
 export const sortTime = (prevPoint, nextPoint) => {
   return (nextPoint.date.finish - nextPoint.date.start) - (prevPoint.date.finish - prevPoint.date.start);
+};
+
+export const sortDate = (prevPoint, nextPoint) => {
+  if (prevPoint.date.start.isAfter(nextPoint.date.start)) {
+    return 1;
+  } else if (!(prevPoint.date.start.isAfter(nextPoint.date.start))) {
+    return -1;
+  }
+
+  return 0;
+};
+
+export const isDatesEqual = (dateA, dateB) => {
+  return (dateA === null && dateB === null) ? true : dayjs(dateA).isSame(dateB, `D`);
 };
