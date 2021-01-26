@@ -6,7 +6,7 @@ import PointNewPresenter from "../presenter/point-new.js";
 import {filter} from "../utils/filter.js";
 import {sortPrice, sortTime, sortDate} from "../utils/common.js";
 import {render, RenderPosition, remove} from "../utils/render.js";
-import {SortType, UpdateType, UserAction, FilterType} from '../utils/const.js';
+import {SortType, UpdateType, UserAction} from '../utils/const.js';
 
 export default class Trip {
   constructor(tripContainer, pointsModel, filterModel) {
@@ -26,22 +26,27 @@ export default class Trip {
     this._handleModeChange = this._handleModeChange.bind(this);
     this._handleSortTypeChange = this._handleSortTypeChange.bind(this);
 
-    this._pointsModel.addObserver(this._handleModelEvent);
-    this._filterModel.addObserver(this._handleModelEvent);
-
     this._pointNewPresenter = new PointNewPresenter(this._tripListComponent, this._handleViewAction);
   }
 
   init() {
     render(this._tripContainer, this._tripListComponent, RenderPosition.BEFOREEND);
 
+    this._pointsModel.addObserver(this._handleModelEvent);
+    this._filterModel.addObserver(this._handleModelEvent);
+
     this._renderTrip();
   }
 
-  createPoint() {
-    this._currentSortType = SortType.DEFAULT;
-    this._filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
-    this._pointNewPresenter.init();
+  destroy() {
+    this._clearTrip({resetSortType: true});
+
+    this._pointsModel.removeObserver(this._handleModelEvent);
+    this._filterModel.removeObserver(this._handleModelEvent);
+  }
+
+  createPoint(callback) {
+    this._pointNewPresenter.init(callback);
   }
 
   _getPoints() {

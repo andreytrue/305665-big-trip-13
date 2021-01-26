@@ -1,3 +1,8 @@
+export const KeyItem = {
+  ESCAPE: `Escape`,
+  ESC: `Esc`
+};
+
 export const SortType = {
   DEFAULT: `sort-day`,
   PRICE: `sort-price`,
@@ -21,3 +26,10 @@ export const FilterType = {
   FUTURE: `future`,
   PAST: `past`
 };
+
+export const MenuItem = {
+  TABLE: `Table`,
+  STATS: `Stats`
+};
+
+export const BAR_HEIGHT = 55;

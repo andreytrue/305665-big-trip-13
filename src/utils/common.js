@@ -45,3 +45,15 @@ export const sortDate = (prevPoint, nextPoint) => {
 export const isDatesEqual = (dateA, dateB) => {
   return (dateA === null && dateB === null) ? true : dayjs(dateA).isSame(dateB, `D`);
 };
+
+export const getDurationInDays = (diffInMs) => {
+  const timeDuration = dayjs.duration(diffInMs);
+  const days = timeDuration.days();
+  const hours = timeDuration.hours();
+
+  if (days > 0) {
+    return (`${addZeroToNumber(days) + `D`} ${((hours > 0) && addZeroToNumber(hours) + `H`) || ``}`);
+  } else {
+    return (`${addZeroToNumber(hours) + `H`}`);
+  }
+};
