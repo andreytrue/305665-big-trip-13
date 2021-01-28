@@ -1,7 +1,7 @@
 import TaskEditView from "../view/point-creator.js";
 import {generateId} from "../mock/point.js";
 import {remove, render, RenderPosition} from "../utils/render.js";
-import {UserAction, UpdateType} from "../utils/const.js";
+import {UserAction, UpdateType, KeyItem} from "../utils/const.js";
 
 export default class PointNew {
   constructor(pointListContainer, changeData) {
@@ -54,7 +54,7 @@ export default class PointNew {
   }
 
   _escKeyDownHandler(evt) {
-    if (evt.key === `Escape` || evt.key === `Esc`) {
+    if (evt.key === KeyItem.ESCAPE || evt.key === KeyItem.ESC) {
       evt.preventDefault();
       this.destroy();
     }
