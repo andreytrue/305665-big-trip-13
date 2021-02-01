@@ -29,6 +29,7 @@ export default class Points extends Observer {
   setDestinations(destinations) {
     this._destinations = destinations;
   }
+
   setOffers(offers) {
     this._offers = offers;
   }
@@ -40,11 +41,7 @@ export default class Points extends Observer {
       throw new Error(`Can't update unexisting point`);
     }
 
-    this._points = [
-      ...this._points.slice(0, index),
-      update,
-      ...this._points.slice(index + 1)
-    ];
+    this._points = this._points.map((point, i) => i === index ? update : point);
 
     this._notify(updateType, update);
   }
@@ -111,14 +108,14 @@ export default class Points extends Observer {
         point,
         {
           "type": point.type,
-          "base_price": point.price,
+          "base_price": +point.price,
           "date_from": point.date.start.toDate().toISOString(),
           "date_to": point.date.finish.toDate().toISOString(),
           "is_favorite": point.isFavorite,
           "destination": {
             "name": point.destination.city,
             "description": point.destination.description,
-            "pictures": point.destination.photos
+            "pictures": point.destination.pictures
           }
         }
     );

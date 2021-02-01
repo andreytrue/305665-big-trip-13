@@ -107,7 +107,7 @@ export default class Trip {
   _handleModelEvent(updateType, data) {
     switch (updateType) {
       case UpdateType.PATCH:
-        this._pointPresenter[data.id].init(data);
+        this._pointPresenter[data.id].init(data, this._getOffers(), this._getDestinations());
         break;
       case UpdateType.MINOR:
         this._clearTrip();
@@ -155,6 +155,8 @@ export default class Trip {
     }
 
     const points = this._getPoints();
+    const offers = this._getOffers();
+    const destinations = this._getDestinations();
     const pointCount = points.length;
 
     if (pointCount < 1) {
@@ -164,12 +166,12 @@ export default class Trip {
 
     this._renderSort();
 
-    points.forEach((point) => this._renderPoint(point));
+    points.forEach((point) => this._renderPoint(point, offers, destinations));
   }
 
-  _renderPoint(point) {
+  _renderPoint(point, offers, destinations) {
     const pointPresenter = new PointPresenter(this._tripListComponent, this._handleViewAction, this._handleModeChange);
-    pointPresenter.init(point);
+    pointPresenter.init(point, offers, destinations);
     this._pointPresenter[point.id] = pointPresenter;
   }
 
@@ -194,6 +196,7 @@ export default class Trip {
     remove(this._loadingComponent);
 
     if (resetSortType) {
+
       this._currentSortType = SortType.DEFAULT;
     }
   }

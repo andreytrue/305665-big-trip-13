@@ -29,7 +29,7 @@ export default class Api {
 
   getOffers() {
     return this._load({url: `offers`})
-    .then(Api.toJSON);
+      .then(Api.toJSON);
   }
 
   updatePoint(point) {
@@ -37,7 +37,7 @@ export default class Api {
       url: `points/${point.id}`,
       method: Method.PUT,
       body: JSON.stringify(PointsModel.adaptToServer(point)),
-      headers: new Headers({"Content-Type": `application/json`})
+      headers: new Headers({'Content-Type': `application/json`})
     })
       .then(Api.toJSON)
       .then(PointsModel.adaptToClient);

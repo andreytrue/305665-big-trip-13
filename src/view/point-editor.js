@@ -1,16 +1,58 @@
 import dayjs from "dayjs";
 import flatpickr from 'flatpickr';
 import he from 'he';
-import {createPointTypeListTemplate, createCitiesTemplate, createPhotosTemplate, createDestinationTemplate, createOffersTemplate} from "./point-creator.js";
+import {createPointTypeListTemplate, createCitiesTemplate, createPhotosTemplate, createDestinationTemplate} from "./point-creator.js";
 import SmartView from "../utils/smart.js";
-
 import "../../node_modules/flatpickr/dist/flatpickr.min.css";
 
-const createFormEditorTemplate = (point) => {
-  const {POINT_TYPES, type, city, price, destinations, offerType, date: {start, finish}} = point;
+const createOfferTemplate = (offerType, offers) => {
+  const offerTemplate = offerType.map((offer, index) => {
+    const {title, price} = offer;
+    const id = `event-offer-${title}-${index}`;
+    const checked = offers.some((elem) => elem.title === offer.title);
+
+    return (
+      `<div class="event__offer-selector">
+        <input 
+          class="event__offer-checkbox  visually-hidden" 
+          id="${id}" 
+          type="checkbox" 
+          name="event-offer-${title}"
+          ${checked ? `checked` : ``}
+        >
+        <label class="event__offer-label" for="${id}">
+          <span class="event__offer-title">${title}</span>
+          &plus;&euro;&nbsp;
+          <span class="event__offer-price">${price}</span>
+        </label>
+      </div>`
+    );
+  }).join(``);
+
+  return offerTemplate;
+};
+
+export const createOffersTemplate = (offerType, offers) => {
+  return (
+    `<section class="event__section  event__section--offers">
+      <h3 class="event__section-title  event__section-title--offers">Offers</h3>
+      <div class="event__available-offers">
+        ${createOfferTemplate(offerType, offers)}
+      </div>
+    </section>`
+  );
+};
+
+const createFormEditorTemplate = (point, types, destinations) => {
+  const {type, destination: {city, description, pictures}, price, offers, date: {start, finish}} = point;
+
+  const typeList = types.map((elem) => createPointTypeListTemplate(elem.type)).join(``);
+
+  const offersForThisType = types.filter((offer) => offer.type === type)[0].offers;
+
   const destinationCities = createCitiesTemplate(destinations);
-  const descriptionForThisCity = destinations.find((destination) => destination.city === city);
-  const photoTemplate = descriptionForThisCity.photos.length ? createPhotosTemplate(descriptionForThisCity.photos) : ``;
+
+  const photoTemplate = pictures.length ? createPhotosTemplate(pictures) : ``;
 
   const startTimeFull = dayjs(start).format(`YYYY-MM-DD HH:mm`);
   const endTimeFull = dayjs(finish).format(`YYYY-MM-DD HH:mm`);
@@ -28,7 +70,7 @@ const createFormEditorTemplate = (point) => {
           <div class="event__type-list">
             <fieldset class="event__type-group">
               <legend class="visually-hidden">Event type</legend>
-              ${POINT_TYPES.map((elem) => createPointTypeListTemplate(elem, elem.toLowerCase() === type.toLowerCase())).join(``)}
+              ${typeList}
             </fieldset>
           </div>
         </div>
@@ -56,7 +98,7 @@ const createFormEditorTemplate = (point) => {
             <span class="visually-hidden">Price</span>
             &euro;
           </label>
-          <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${price}">
+          <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${price}" required>
         </div>
 
         <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
@@ -66,8 +108,8 @@ const createFormEditorTemplate = (point) => {
         </button>
       </header>
       <section class="event__details">
-        ${offerType.length ? createOffersTemplate(offerType) : ``}
-        ${createDestinationTemplate(descriptionForThisCity.description, photoTemplate)}
+        ${offersForThisType.length ? createOffersTemplate(offersForThisType, offers) : ``}
+        ${createDestinationTemplate(description, photoTemplate)}
       </section>
     </form>
   </li>`;
@@ -75,11 +117,13 @@ const createFormEditorTemplate = (point) => {
 
 
 export default class FormEditor extends SmartView {
-  constructor(point) {
+  constructor(point, offers, destinations) {
     super();
-    this._data = FormEditor.parsePointToData(point);
+    this._offers = offers;
+    this._destinations = destinations;
     this._datepickerStartDate = null;
     this._datepickerEndDate = null;
+    this._data = FormEditor.parsePointToData(point, this._offers);
 
     this._formSubmitHandler = this._formSubmitHandler.bind(this);
     this._pointClickHandler = this._pointClickHandler.bind(this);
@@ -98,20 +142,34 @@ export default class FormEditor extends SmartView {
   }
 
   getTemplate() {
-    return createFormEditorTemplate(this._data);
+    return createFormEditorTemplate(this._data, this._offers, this._destinations);
   }
 
-  static parsePointToData(point) {
-    const offers = JSON.parse(JSON.stringify(point.offers));
-    const offerType = offers.filter((offer) => offer.id.toLowerCase() === point.type.toLowerCase());
+  static parsePointToData(point, offers) {
+    const selectedOffers = JSON.parse(JSON.stringify(point.offers));
+    const offerType = offers.filter(({type}) => type === point.type)[0].offers;
+
     return Object.assign(
         {},
         point,
         {
           offerType,
-          offers,
+          selectedOffers,
         }
     );
+  }
+
+  static parseDataToPoint(data) {
+    data = Object.assign({},
+        data,
+        {
+          offers: data.selectedOffers
+        }
+    );
+    delete data.offerType;
+    delete data.selectedOffers;
+
+    return data;
   }
 
   _onFormSubmit(evt) {
@@ -122,13 +180,6 @@ export default class FormEditor extends SmartView {
   _setFormCloseHandler(evt) {
     evt.preventDefault();
     this._callback.closeForm();
-  }
-
-  static parseDataToPoint(data) {
-    data = Object.assign({}, data);
-    delete data.offerType;
-
-    return data;
   }
 
   _formSubmitHandler(evt) {
@@ -172,24 +223,28 @@ export default class FormEditor extends SmartView {
 
   _eventTypeHandler(evt) {
     evt.preventDefault();
-    for (let offer of this._data.offers) {
-      offer.checked = false;
-    }
-    const offerType = this._data.offers.filter((offer) => offer.id.toLowerCase() === evt.target.value);
-    this.updateData({type: evt.target.value, offerType});
+    const offerType = this._offers.filter(({type}) => type === evt.target.value)[0].offers;
+    this.updateData({type: evt.target.value, offerType, selectedOffers: []});
   }
 
   _destinationHandler(evt) {
     evt.preventDefault();
-    if (!this._data.CITIES.includes(evt.target.value)) {
+    if (!this._destinations.some((destination) => destination.name === evt.target.value)) {
       this.getElement()
         .querySelector(`.event__input--destination`)
         .setCustomValidity(`Введите город из списка`);
     } else {
+      const selectDestination = (this._destinations.find(({name}) => name === evt.target.value));
       this.getElement()
         .querySelector(`.event__input--destination`)
         .setCustomValidity(``);
-      this.updateData({city: evt.target.value});
+      this.updateData({
+        destination: {
+          city: evt.target.value,
+          description: selectDestination.description,
+          pictures: selectDestination.pictures,
+        },
+      });
     }
   }
 
@@ -200,9 +255,12 @@ export default class FormEditor extends SmartView {
 
   _offersHandler(evt) {
     evt.preventDefault();
-    const offerElement = this._data.offers.find(({title}) => evt.target.name.includes(title));
-    offerElement.checked = offerElement.checked ? false : true;
-    this.updateData({offers: this._data.offers}, true);
+    if (this._data.selectedOffers.some(({title}) => `event-offer-${title}` === evt.target.name)) {
+      this._data.selectedOffers = this._data.selectedOffers.filter(({title}) => `event-offer-${title}` !== evt.target.name);
+    } else {
+      this._data.selectedOffers.push(this._data.offerType.find(({title}) => `event-offer-${title}` === evt.target.name));
+    }
+    this.updateData({offers: this._data.selectedOffers}, true);
   }
 
   _setInnerHandlers() {
@@ -299,7 +357,7 @@ export default class FormEditor extends SmartView {
     }
   }
 
-  reset(point) {
-    this.updateData(FormEditor.parsePointToData(point));
+  reset(point, offers) {
+    this.updateData(FormEditor.parsePointToData(point, offers));
   }
 }
