@@ -287,11 +287,10 @@ export default class FormCreator extends SmartView {
 
   _eventTypeHandler(evt) {
     evt.preventDefault();
-    for (let offer of this._data.offers) {
-      offer.checked = false;
-    }
-    const offerType = this._data.offers.filter((offer) => offer.id.toLowerCase() === evt.target.value);
-    this.updateData({type: evt.target.value, offerType});
+
+    const offerType = this._offers.filter(({type}) => type === evt.target.value)[0].offers;
+
+    this.updateData({type: evt.target.value, offerType, selectedOffers: []});
   }
 
   _destinationHandler(evt) {
