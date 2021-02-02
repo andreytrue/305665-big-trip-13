@@ -1,7 +1,7 @@
 import TaskEditView from "../view/point-creator.js";
-import {generateId} from "../mock/point.js";
+import {generateId} from "../utils/common.js";
 import {remove, render, RenderPosition} from "../utils/render.js";
-import {UserAction, UpdateType, KeyItem} from "../utils/const.js";
+import {UserAction, UpdateType, KeyItem, DEFAULT_POINT} from "../utils/const.js";
 
 export default class PointNew {
   constructor(pointListContainer, changeData) {
@@ -15,12 +15,12 @@ export default class PointNew {
     this._escKeyDownHandler = this._escKeyDownHandler.bind(this);
   }
 
-  init() {
+  init(offers, destinations) {
     if (this._pointEditComponent !== null) {
       return;
     }
 
-    this._pointEditComponent = new TaskEditView();
+    this._pointEditComponent = new TaskEditView(DEFAULT_POINT, offers, destinations);
     this._pointEditComponent.setFormSubmitHandler(this._handleFormSubmit);
     this._pointEditComponent.setDeleteClickHandler(this._handleDeleteClick);
 

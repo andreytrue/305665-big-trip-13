@@ -27,14 +27,16 @@ export default class Point {
     this._handleDeleteClick = this._handleDeleteClick.bind(this);
   }
 
-  init(point) {
+  init(point, offers, destinations) {
     this._point = point;
+    this._offers = offers;
+    this._destinations = destinations;
 
     const prevPointComponent = this._pointComponent;
     const prevPointEditComponent = this._pointEditComponent;
 
+    this._pointEditComponent = new PointEditorView(point, offers, destinations);
     this._pointComponent = new PointView(point);
-    this._pointEditComponent = new PointEditorView(point);
 
     this._pointComponent.setEditClickHandler(this._handleEditClick);
     this._pointComponent.setFavoriteClickHandler(this._handleFavoriteClick);
@@ -66,6 +68,7 @@ export default class Point {
 
   resetView() {
     if (this._mode !== Mode.DEFAULT) {
+      this._pointEditComponent.reset(this._point, this._offers);
       this._replaceEditToPoint();
     }
   }
@@ -107,6 +110,7 @@ export default class Point {
   _escKeyDownHandler(evt) {
     if (evt.key === `Escape` || evt.key === `Esc`) {
       evt.preventDefault();
+      this._pointEditComponent.reset(this._point, this._offers);
       this._replaceEditToPoint();
     }
   }

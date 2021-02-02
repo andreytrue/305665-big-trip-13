@@ -5,17 +5,16 @@ import {getEventDuration} from '../utils/common';
 const createOffersTemplate = (offers) => {
   return offers.map((offer) => (
     `<li class="event__offer">
-      <span class="event__offer-title">${offer.name ? offer.name : ``}</span>
-       ${offer.name ? `&plus;&euro;&nbsp;` : ``}
+      <span class="event__offer-title">${offer.title ? offer.title : ``}</span>
+       ${offer.title ? `&plus;&euro;&nbsp;` : ``}
       <span class="event__offer-price">${offer.price ? offer.price : ``}</span>
     </li>`
   )).join(``);
 };
 
 const createPointTemplate = (point) => {
-  const {type, city, price, offers, isFavorite, date: {start, finish}} = point;
-  const offersChecked = offers.filter((offer) => offer.id.toLowerCase() === type.toLowerCase() && offer.checked);
-  const offerTemplate = createOffersTemplate(offersChecked);
+  const {type, destination: {city}, price, offers, isFavorite, date: {start, finish}} = point;
+  const offerTemplate = createOffersTemplate(offers);
 
   const durationTime = getEventDuration(start, finish);
 

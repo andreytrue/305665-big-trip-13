@@ -1,3 +1,5 @@
+import dayjs from 'dayjs';
+
 export const KeyItem = {
   ESCAPE: `Escape`,
   ESC: `Esc`
@@ -18,7 +20,8 @@ export const UserAction = {
 export const UpdateType = {
   PATCH: `PATCH`,
   MINOR: `MINOR`,
-  MAJOR: `MAJOR`
+  MAJOR: `MAJOR`,
+  INIT: `INIT`
 };
 
 export const FilterType = {
@@ -33,3 +36,15 @@ export const MenuItem = {
 };
 
 export const BAR_HEIGHT = 55;
+
+export const DEFAULT_POINT = {
+  type: `Taxi`,
+  price: `0`,
+  offers: [],
+  destination: {},
+  date: {
+    start: dayjs(),
+    finish: dayjs(),
+  },
+  isFavorite: false,
+};
