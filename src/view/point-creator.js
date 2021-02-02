@@ -2,7 +2,7 @@ import SmartView from "../utils/smart.js";
 import dayjs from 'dayjs';
 import flatpickr from 'flatpickr';
 
-export const createPointTypeListTemplate = (eventType) => {
+export const createPointTypeListTemplate = (eventType, isDisabled) => {
   const pointTypeLowerCase = eventType.toLowerCase();
 
   return (
@@ -13,6 +13,7 @@ export const createPointTypeListTemplate = (eventType) => {
         type="radio" 
         name="event-type" 
         value="${pointTypeLowerCase}"
+        ${isDisabled ? `disabled` : ``}
       >
       <label class="event__type-label  event__type-label--${pointTypeLowerCase}" 
       for="event-type-${pointTypeLowerCase}-1">${eventType}
@@ -49,7 +50,7 @@ export const createDestinationTemplate = (description, photos) => {
   return ``;
 };
 
-const createOfferTemplate = (offerType) => {
+const createOfferTemplate = (offerType, isDisabled) => {
   const offerTemplate = offerType.map((offer, index) => {
     const {title, price} = offer;
     const id = `event-offer-${title}-${index}`;
@@ -61,6 +62,7 @@ const createOfferTemplate = (offerType) => {
           id="${id}" 
           type="checkbox" 
           name="event-offer-${title}"
+          ${isDisabled ? `disabled` : ``}
         >
         <label class="event__offer-label" for="${id}">
           <span class="event__offer-title">${title}</span>
@@ -74,23 +76,29 @@ const createOfferTemplate = (offerType) => {
   return offerTemplate;
 };
 
-export const createOffersTemplate = (offerType) => {
+export const createOffersTemplate = (offerType, isDisabled) => {
   return (
     `<section class="event__section  event__section--offers">
       <h3 class="event__section-title  event__section-title--offers">Offers</h3>
       <div class="event__available-offers">
-        ${createOfferTemplate(offerType)}
+        ${createOfferTemplate(offerType, isDisabled)}
       </div>
     </section>`
   );
 };
 
 const createNewFormElementTemplate = (point, offers, destinations) => {
-  const {type, date: {start, finish}, destination: {city, pictures, description}} = point;
+  const {type,
+    date: {start, finish},
+    destination: {city, pictures, description},
+    isDisabled,
+    isDeleting,
+    isSaving
+  } = point;
 
   const destinationCities = createCitiesTemplate(destinations);
 
-  const typesTemplate = offers.map((elem) => createPointTypeListTemplate(elem.type)).join(``);
+  const typesTemplate = offers.map((elem) => createPointTypeListTemplate(elem.type, isDisabled)).join(``);
 
   const offersForThisType = offers.filter((offer) => offer.type === type.toLowerCase())[0].offers;
 
@@ -121,7 +129,7 @@ const createNewFormElementTemplate = (point, offers, destinations) => {
           <label class="event__label  event__type-output" for="event-destination-1">
             ${type}
           </label>
-          <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${city}" list="destination-list-1">
+          <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${city}" list="destination-list-1" ${isDisabled ? `disabled` : ``}>
           <datalist id="destination-list-1">
             ${destinationCities}
           </datalist>
@@ -129,10 +137,10 @@ const createNewFormElementTemplate = (point, offers, destinations) => {
 
         <div class="event__field-group  event__field-group--time">
           <label class="visually-hidden" for="event-start-time-1">From</label>
-          <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${startTimeFull}">
+          <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${startTimeFull}" ${isDisabled ? `disabled` : ``}>
           &mdash;
           <label class="visually-hidden" for="event-end-time-1">To</label>
-          <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${endTimeFull}">
+          <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${endTimeFull}" ${isDisabled ? `disabled` : ``}>
         </div>
 
         <div class="event__field-group  event__field-group--price">
@@ -143,14 +151,18 @@ const createNewFormElementTemplate = (point, offers, destinations) => {
           <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="" required>
         </div>
 
-        <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-        <button class="event__reset-btn" type="reset">Delete</button>
+        <button class="event__save-btn  btn  btn--blue" type="submit" ${isSaving ? `disabled` : ``}>
+          ${isSaving ? `Saving...` : `Save`}
+        </button>
+        <button class="event__reset-btn" type="reset" ${isDeleting ? `disabled` : ``}>
+          ${isDeleting ? `Deleting...` : `Delete`}
+        </button>
         <button class="event__rollup-btn" type="button">
           <span class="visually-hidden">Open event</span>
         </button>
       </header>
       <section class="event__details">
-        ${offersForThisType.length ? createOffersTemplate(offersForThisType) : ``}
+        ${offersForThisType.length ? createOffersTemplate(offersForThisType, isDisabled) : ``}
         ${createDestinationTemplate(description, photoTemplate)}
       </section>
     </form>
@@ -201,7 +213,10 @@ export default class FormCreator extends SmartView {
             city: name,
             description,
             pictures,
-          }
+          },
+          isDisabled: false,
+          isSaving: false,
+          isDeleting: false
         }
     );
   }
@@ -225,6 +240,9 @@ export default class FormCreator extends SmartView {
     );
     delete data.offerType;
     delete data.selectedOffers;
+    delete data.isDisabled;
+    delete data.isSaving;
+    delete data.isDeleting;
 
     return data;
   }

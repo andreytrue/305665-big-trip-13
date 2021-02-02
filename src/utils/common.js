@@ -57,5 +57,3 @@ export const getDurationInDays = (diffInMs) => {
     return (`${addZeroToNumber(hours) + `H`}`);
   }
 };
-
-export const generateId = () => Date.now() + parseInt(Math.random() * 10000, 10);

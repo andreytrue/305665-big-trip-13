@@ -1,5 +1,4 @@
 import TaskEditView from "../view/point-creator.js";
-import {generateId} from "../utils/common.js";
 import {remove, render, RenderPosition} from "../utils/render.js";
 import {UserAction, UpdateType, KeyItem, DEFAULT_POINT} from "../utils/const.js";
 
@@ -40,11 +39,30 @@ export default class PointNew {
     document.removeEventListener(`keydown`, this._escKeyDownHandler);
   }
 
+  setSaving() {
+    this._pointEditComponent.updateData({
+      isDisabled: true,
+      isSaving: true
+    });
+  }
+
+  setAborting() {
+    const resetFormState = () => {
+      this._pointEditComponent.updateData({
+        isDisabled: false,
+        isSaving: false,
+        isDeleting: false
+      });
+    };
+
+    this._pointEditComponent.shake(resetFormState);
+  }
+
   _handleFormSubmit(point) {
     this._changeData(
         UserAction.ADD_POINT,
         UpdateType.MINOR,
-        Object.assign({id: generateId()}, point)
+        point
     );
     this.destroy();
   }
