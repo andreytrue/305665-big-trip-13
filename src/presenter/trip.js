@@ -7,7 +7,7 @@ import LoadingView from "../view/loading.js";
 import {filter} from "../utils/filter.js";
 import {sortPrice, sortTime, sortDate} from "../utils/common.js";
 import {render, RenderPosition, remove} from "../utils/render.js";
-import {SortType, UpdateType, UserAction} from '../utils/const.js';
+import {SortType, FilterType, UpdateType, UserAction} from '../utils/const.js';
 
 export default class Trip {
   constructor(tripContainer, pointsModel, filterModel, api) {
@@ -52,6 +52,9 @@ export default class Trip {
   createPoint() {
     const offers = this._getOffers();
     const destinations = this._getDestinations();
+
+    this._currentSortType = SortType.DEFAULT;
+    this._filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
 
     this._pointNewPresenter.init(offers, destinations);
   }
