@@ -243,7 +243,9 @@ export default class FormEditor extends SmartView {
 
   _eventTypeHandler(evt) {
     evt.preventDefault();
+
     const offerType = this._offers.filter(({type}) => type === evt.target.value)[0].offers;
+
     this.updateData({type: evt.target.value, offerType, selectedOffers: []});
   }
 
@@ -317,6 +319,7 @@ export default class FormEditor extends SmartView {
         {
           dateFormat: `d/m/Y H:i`,
           defaultDate: this._data.date.start.toDate(),
+          enableTime: true,
           onChange: this._startDateChangeHandler
         }
     );
@@ -326,6 +329,7 @@ export default class FormEditor extends SmartView {
         {
           dateFormat: `d/m/Y H:i`,
           defaultDate: this._data.date.finish.toDate(),
+          enableTime: true,
           onChange: this._endDateChangeHandler
         }
     );
