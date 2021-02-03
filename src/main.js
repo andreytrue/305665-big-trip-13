@@ -17,7 +17,7 @@ const api = new Api(END_POINT, AUTHORIZATION);
 const pointsModel = new PointsModel();
 const filterModel = new FilterModel();
 
-const tripMain = document.querySelector('.trip-main');
+const tripMain = document.querySelector(`.trip-main`);
 
 document.querySelector(`.trip-main__event-add-btn`).addEventListener(`click`, (evt) => {
   evt.preventDefault();
@@ -27,9 +27,9 @@ document.querySelector(`.trip-main__event-add-btn`).addEventListener(`click`, (e
 const siteMenuComponent = new MenuView();
 let statsComponent = null;
 
-const tripControls = document.querySelector('.trip-controls');
+const tripControls = document.querySelector(`.trip-controls`);
 
-const tripEvents = document.querySelector('.trip-events');
+const tripEvents = document.querySelector(`.trip-events`);
 
 const tripPresenter = new TripPresenter(tripEvents, pointsModel, filterModel, api);
 const filterPresenter = new FilterPresenter(tripControls, filterModel, pointsModel);
