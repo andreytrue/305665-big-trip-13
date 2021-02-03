@@ -73,4 +73,3 @@ Promise
     render(tripControls, siteMenuComponent, RenderPosition.AFTERBEGIN);
     siteMenuComponent.setMenuClickHandler(handleSiteMenuClick);
   });
-
