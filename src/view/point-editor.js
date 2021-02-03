@@ -5,7 +5,7 @@ import {createPointTypeListTemplate, createCitiesTemplate, createPhotosTemplate,
 import SmartView from "../utils/smart.js";
 import "../../node_modules/flatpickr/dist/flatpickr.min.css";
 
-const createOfferTemplate = (offerType, offers) => {
+const createOfferTemplate = (offerType, offers, isDisabled) => {
   const offerTemplate = offerType.map((offer, index) => {
     const {title, price} = offer;
     const id = `event-offer-${title}-${index}`;
@@ -19,6 +19,7 @@ const createOfferTemplate = (offerType, offers) => {
           type="checkbox" 
           name="event-offer-${title}"
           ${checked ? `checked` : ``}
+          ${isDisabled ? `disabled` : ``}
         >
         <label class="event__offer-label" for="${id}">
           <span class="event__offer-title">${title}</span>
@@ -32,25 +33,34 @@ const createOfferTemplate = (offerType, offers) => {
   return offerTemplate;
 };
 
-export const createOffersTemplate = (offerType, offers) => {
+export const createOffersTemplate = (offerType, offers, isDisabled) => {
   return (
     `<section class="event__section  event__section--offers">
       <h3 class="event__section-title  event__section-title--offers">Offers</h3>
       <div class="event__available-offers">
-        ${createOfferTemplate(offerType, offers)}
+        ${createOfferTemplate(offerType, offers, isDisabled)}
       </div>
     </section>`
   );
 };
 
 const createFormEditorTemplate = (point, types, destinations) => {
-  const {type, destination: {city, description, pictures}, price, offers, date: {start, finish}} = point;
+  const {
+    type,
+    destination: {city, description, pictures},
+    price,
+    offers,
+    date: {start, finish},
+    isDisabled,
+    isSaving,
+    isDeleting
+  } = point;
 
-  const typeList = types.map((elem) => createPointTypeListTemplate(elem.type)).join(``);
+  const typeList = types.map((elem) => createPointTypeListTemplate(elem.type, isDisabled)).join(``);
 
   const offersForThisType = types.filter((offer) => offer.type === type)[0].offers;
 
-  const destinationCities = createCitiesTemplate(destinations);
+  const destinationCities = createCitiesTemplate(destinations, isDisabled);
 
   const photoTemplate = pictures.length ? createPhotosTemplate(pictures) : ``;
 
@@ -79,7 +89,7 @@ const createFormEditorTemplate = (point, types, destinations) => {
           <label class="event__label  event__type-output" for="event-destination-1">
             ${type}
           </label>
-          <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${he.encode(city)}" list="destination-list-1">
+          <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${he.encode(city)}" list="destination-list-1" ${isDisabled ? `disabled` : ``}>
           <datalist id="destination-list-1">
             ${destinationCities}
           </datalist>
@@ -87,10 +97,10 @@ const createFormEditorTemplate = (point, types, destinations) => {
 
         <div class="event__field-group  event__field-group--time">
           <label class="visually-hidden" for="event-start-time-1">From</label>
-          <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${startTimeFull}">
+          <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${startTimeFull}" ${isDisabled ? `disabled` : ``}>
           &mdash;
           <label class="visually-hidden" for="event-end-time-1">To</label>
-          <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${endTimeFull}">
+          <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${endTimeFull}" ${isDisabled ? `disabled` : ``}>
         </div>
 
         <div class="event__field-group  event__field-group--price">
@@ -101,14 +111,18 @@ const createFormEditorTemplate = (point, types, destinations) => {
           <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${price}" required>
         </div>
 
-        <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-        <button class="event__reset-btn" type="reset">Delete</button>
+        <button class="event__save-btn  btn  btn--blue" type="submit" ${isSaving ? `disabled` : ``}>
+          ${isSaving ? `Saving...` : `Save`}
+        </button>
+        <button class="event__reset-btn" type="reset" ${isDeleting ? `disabled` : ``}>
+          ${isDeleting ? `Deleting...` : `Delete`}
+        </button>
         <button class="event__rollup-btn" type="button">
           <span class="visually-hidden">Open event</span>
         </button>
       </header>
       <section class="event__details">
-        ${offersForThisType.length ? createOffersTemplate(offersForThisType, offers) : ``}
+        ${offersForThisType.length ? createOffersTemplate(offersForThisType, offers, isDisabled) : ``}
         ${createDestinationTemplate(description, photoTemplate)}
       </section>
     </form>
@@ -155,6 +169,9 @@ export default class FormEditor extends SmartView {
         {
           offerType,
           selectedOffers,
+          isDisabled: false,
+          isSaving: false,
+          isDeleting: false
         }
     );
   }
@@ -168,6 +185,9 @@ export default class FormEditor extends SmartView {
     );
     delete data.offerType;
     delete data.selectedOffers;
+    delete data.isDisabled;
+    delete data.isSaving;
+    delete data.isDeleting;
 
     return data;
   }
@@ -223,7 +243,9 @@ export default class FormEditor extends SmartView {
 
   _eventTypeHandler(evt) {
     evt.preventDefault();
+
     const offerType = this._offers.filter(({type}) => type === evt.target.value)[0].offers;
+
     this.updateData({type: evt.target.value, offerType, selectedOffers: []});
   }
 
@@ -297,6 +319,7 @@ export default class FormEditor extends SmartView {
         {
           dateFormat: `d/m/Y H:i`,
           defaultDate: this._data.date.start.toDate(),
+          enableTime: true,
           onChange: this._startDateChangeHandler
         }
     );
@@ -306,6 +329,7 @@ export default class FormEditor extends SmartView {
         {
           dateFormat: `d/m/Y H:i`,
           defaultDate: this._data.date.finish.toDate(),
+          enableTime: true,
           onChange: this._endDateChangeHandler
         }
     );
