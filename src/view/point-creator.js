@@ -363,6 +363,7 @@ export default class FormCreator extends SmartView {
         this.getElement().querySelector(`#event-start-time-1`),
         {
           dateFormat: `d/m/Y H:i`,
+          enableTime: true,
           defaultDate: this._data.date.start.toDate(),
           onChange: this._startDateChangeHandler
         }
@@ -372,6 +373,7 @@ export default class FormCreator extends SmartView {
         this.getElement().querySelector(`#event-end-time-1`),
         {
           dateFormat: `d/m/Y H:i`,
+          enableTime: true,
           defaultDate: this._data.date.finish.toDate(),
           onChange: this._endDateChangeHandler
         }

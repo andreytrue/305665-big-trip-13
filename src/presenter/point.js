@@ -31,6 +31,7 @@ export default class Point {
     this._handleFormClick = this._handleFormClick.bind(this);
     this._escKeyDownHandler = this._escKeyDownHandler.bind(this);
     this._handleDeleteClick = this._handleDeleteClick.bind(this);
+    this._handleFormClose = this._handleFormClose.bind(this);
   }
 
   init(point, offers, destinations) {
@@ -47,6 +48,7 @@ export default class Point {
     this._pointComponent.setEditClickHandler(this._handleEditClick);
     this._pointComponent.setFavoriteClickHandler(this._handleFavoriteClick);
     this._pointEditComponent.setFormSubmitHandler(this._handleFormSubmit);
+    this._pointEditComponent.setFormCloseHandler(this._handleFormClose);
     this._pointEditComponent.setPointClickHandler(this._handleFormClick);
     this._pointEditComponent.setDeleteClickHandler(this._handleDeleteClick);
 
@@ -150,6 +152,11 @@ export default class Point {
       this._pointEditComponent.reset(this._point, this._offers);
       this._replaceEditToPoint();
     }
+  }
+
+  _handleFormClose() {
+    this._pointEditComponent.reset(this._point, this._offers);
+    this._replaceEditToPoint();
   }
 
   _handleFavoriteClick() {

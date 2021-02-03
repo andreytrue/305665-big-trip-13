@@ -51,9 +51,5 @@ export const getDurationInDays = (diffInMs) => {
   const days = timeDuration.days();
   const hours = timeDuration.hours();
 
-  if (days > 0) {
-    return (`${addZeroToNumber(days) + `D`} ${((hours > 0) && addZeroToNumber(hours) + `H`) || ``}`);
-  } else {
-    return (`${addZeroToNumber(hours) + `H`}`);
-  }
+  return (`${addZeroToNumber(days) + `D`} ${((hours > 0) && addZeroToNumber(hours) + `H`) || ``}`);
 };

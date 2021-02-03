@@ -35,6 +35,7 @@ export default class PointNew {
 
     remove(this._pointEditComponent);
     this._pointEditComponent = null;
+    document.querySelector(`.trip-main__event-add-btn`).disabled = false;
 
     document.removeEventListener(`keydown`, this._escKeyDownHandler);
   }

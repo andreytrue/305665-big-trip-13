@@ -22,6 +22,7 @@ const tripMain = document.querySelector(`.trip-main`);
 document.querySelector(`.trip-main__event-add-btn`).addEventListener(`click`, (evt) => {
   evt.preventDefault();
   tripPresenter.createPoint();
+  evt.target.disabled = true;
 });
 
 const siteMenuComponent = new MenuView();
@@ -45,6 +46,7 @@ const handleSiteMenuClick = (menuItem) => {
     default:
       tripPresenter.init();
       infoPresenter.init();
+      evt.target.disabled = true;
       remove(statsComponent);
       break;
   }
