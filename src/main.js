@@ -44,6 +44,7 @@ const handleSiteMenuClick = (menuItem) => {
       break;
     default:
       tripPresenter.init();
+      infoPresenter.init();
       remove(statsComponent);
       break;
   }
