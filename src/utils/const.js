@@ -38,7 +38,7 @@ export const MenuItem = {
 export const BAR_HEIGHT = 55;
 
 export const DEFAULT_POINT = {
-  type: `Taxi`,
+  type: `taxi`,
   price: `0`,
   offers: [],
   destination: {},
