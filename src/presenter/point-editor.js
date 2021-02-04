@@ -1,61 +1,15 @@
-import SmartView from "../utils/smart.js";
-import dayjs from 'dayjs';
+import dayjs from "dayjs";
 import flatpickr from 'flatpickr';
+import he from 'he';
+import {createPointTypeListTemplate, createCitiesTemplate, createPhotosTemplate, createDestinationTemplate} from "./point-creator.js";
+import SmartView from "../utils/smart.js";
+import "../../node_modules/flatpickr/dist/flatpickr.min.css";
 
-export const createPointTypeListTemplate = (eventType, type, isDisabled) => {
-  const pointTypeLowerCase = eventType.toLowerCase();
-  const checked = (eventType === type);
-
-  return (
-    `<div class="event__type-item">
-      <input 
-        id="event-type-${pointTypeLowerCase}-1" 
-        class="event__type-input  visually-hidden" 
-        type="radio" 
-        name="event-type" 
-        value="${pointTypeLowerCase}"
-        ${checked ? `checked` : ``}
-        ${isDisabled ? `disabled` : ``}
-      >
-      <label class="event__type-label  event__type-label--${pointTypeLowerCase}" 
-      for="event-type-${pointTypeLowerCase}-1">${eventType}
-      </label>
-    </div>`
-  );
-};
-
-export const createCitiesTemplate = (destinations) => {
-  return destinations.map(({name}) =>
-    `<option value=${name}></option>`);
-};
-
-export const createPhotosTemplate = (photos) => {
-  return photos.map((photo) =>
-    `<img class="event__photo" src="${photo.src}" alt="${photo.description}">`).join(``);
-};
-
-export const createDestinationTemplate = (description, photos) => {
-  if (description.length || photos) {
-    return (
-      `<section class="event__section  event__section--destination">
-        <h3 class="event__section-title  event__section-title--destination">Destination</h3>
-        <p class="event__destination-description">${description}</p>
-        <div class="event__photos-container">
-          <div class="event__photos-tape">
-            ${photos}
-          </div>
-        </div>
-      </section>`
-    );
-  }
-
-  return ``;
-};
-
-const createOfferTemplate = (offerType, isDisabled) => {
+const createOfferTemplate = (offerType, offers, isDisabled) => {
   const offerTemplate = offerType.map((offer, index) => {
     const {title, price} = offer;
     const id = `event-offer-${title}-${index}`;
+    const checked = offers.some((elem) => elem.title === offer.title);
 
     return (
       `<div class="event__offer-selector">
@@ -64,6 +18,7 @@ const createOfferTemplate = (offerType, isDisabled) => {
           id="${id}" 
           type="checkbox" 
           name="event-offer-${title}"
+          ${checked ? `checked` : ``}
           ${isDisabled ? `disabled` : ``}
         >
         <label class="event__offer-label" for="${id}">
@@ -78,31 +33,34 @@ const createOfferTemplate = (offerType, isDisabled) => {
   return offerTemplate;
 };
 
-export const createOffersTemplate = (offerType, isDisabled) => {
+export const createOffersTemplate = (offerType, offers, isDisabled) => {
   return (
     `<section class="event__section  event__section--offers">
       <h3 class="event__section-title  event__section-title--offers">Offers</h3>
       <div class="event__available-offers">
-        ${createOfferTemplate(offerType, isDisabled)}
+        ${createOfferTemplate(offerType, offers, isDisabled)}
       </div>
     </section>`
   );
 };
 
-const createNewFormElementTemplate = (point, offers, destinations) => {
-  const {type,
+const createFormEditorTemplate = (point, types, destinations) => {
+  const {
+    type,
+    destination: {city, description, pictures},
+    price,
+    offers,
     date: {start, finish},
-    destination: {city, pictures, description},
     isDisabled,
-    isDeleting,
-    isSaving
+    isSaving,
+    isDeleting
   } = point;
 
-  const destinationCities = createCitiesTemplate(destinations);
+  const typeList = types.map((elem) => createPointTypeListTemplate(elem.type, type, isDisabled)).join(``);
 
-  const typesTemplate = offers.map((elem) => createPointTypeListTemplate(elem.type, type, isDisabled)).join(``);
+  const offersForThisType = types.filter((offer) => offer.type === type)[0].offers;
 
-  const offersForThisType = offers.filter((offer) => offer.type === type.toLowerCase())[0].offers;
+  const destinationCities = createCitiesTemplate(destinations, isDisabled);
 
   const photoTemplate = pictures.length ? createPhotosTemplate(pictures) : ``;
 
@@ -122,7 +80,7 @@ const createNewFormElementTemplate = (point, offers, destinations) => {
           <div class="event__type-list">
             <fieldset class="event__type-group">
               <legend class="visually-hidden">Event type</legend>
-              ${typesTemplate}
+              ${typeList}
             </fieldset>
           </div>
         </div>
@@ -131,7 +89,7 @@ const createNewFormElementTemplate = (point, offers, destinations) => {
           <label class="event__label  event__type-output" for="event-destination-1">
             ${type}
           </label>
-          <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${city}" list="destination-list-1" ${isDisabled ? `disabled` : ``}>
+          <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${he.encode(city)}" list="destination-list-1" ${isDisabled ? `disabled` : ``}>
           <datalist id="destination-list-1">
             ${destinationCities}
           </datalist>
@@ -150,7 +108,7 @@ const createNewFormElementTemplate = (point, offers, destinations) => {
             <span class="visually-hidden">Price</span>
             &euro;
           </label>
-          <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="" required>
+          <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${price}" required>
         </div>
 
         <button class="event__save-btn  btn  btn--blue" type="submit" ${isSaving ? `disabled` : ``}>
@@ -164,21 +122,22 @@ const createNewFormElementTemplate = (point, offers, destinations) => {
         </button>
       </header>
       <section class="event__details">
-        ${offersForThisType.length ? createOffersTemplate(offersForThisType, isDisabled) : ``}
+        ${offersForThisType.length ? createOffersTemplate(offersForThisType, offers, isDisabled) : ``}
         ${createDestinationTemplate(description, photoTemplate)}
       </section>
     </form>
   </li>`;
 };
 
-export default class FormCreator extends SmartView {
+
+export default class FormEditor extends SmartView {
   constructor(point, offers, destinations) {
     super();
     this._offers = offers;
     this._destinations = destinations;
     this._datepickerStartDate = null;
     this._datepickerEndDate = null;
-    this._data = FormCreator.parsePointToData(point, this._offers, this._destinations);
+    this._data = FormEditor.parsePointToData(point, this._offers);
 
     this._formSubmitHandler = this._formSubmitHandler.bind(this);
     this._pointClickHandler = this._pointClickHandler.bind(this);
@@ -197,13 +156,12 @@ export default class FormCreator extends SmartView {
   }
 
   getTemplate() {
-    return createNewFormElementTemplate(this._data, this._offers, this._destinations);
+    return createFormEditorTemplate(this._data, this._offers, this._destinations);
   }
 
-  static parsePointToData(point, offers, destinations) {
+  static parsePointToData(point, offers) {
     const selectedOffers = JSON.parse(JSON.stringify(point.offers));
-    const offerType = offers.filter(({type}) => type === point.type.toLowerCase())[0].offers;
-    const {name, description, pictures} = destinations[0];
+    const offerType = offers.filter(({type}) => type === point.type)[0].offers;
 
     return Object.assign(
         {},
@@ -211,11 +169,6 @@ export default class FormCreator extends SmartView {
         {
           offerType,
           selectedOffers,
-          destination: {
-            city: name,
-            description,
-            pictures,
-          },
           isDisabled: false,
           isSaving: false,
           isDeleting: false
@@ -223,21 +176,11 @@ export default class FormCreator extends SmartView {
     );
   }
 
-  _onFormSubmit(evt) {
-    evt.preventDefault();
-    this._callback.submitForm(FormCreator.parseDataToPoint(this._data));
-  }
-
-  _setFormCloseHandler(evt) {
-    evt.preventDefault();
-    this._callback.closeForm();
-  }
-
   static parseDataToPoint(data) {
     data = Object.assign({},
         data,
         {
-          offers: data.offers,
+          offers: data.selectedOffers
         }
     );
     delete data.offerType;
@@ -249,9 +192,19 @@ export default class FormCreator extends SmartView {
     return data;
   }
 
+  _onFormSubmit(evt) {
+    evt.preventDefault();
+    this._callback.submitForm(FormEditor.parseDataToPoint(this._data));
+  }
+
+  _setFormCloseHandler(evt) {
+    evt.preventDefault();
+    this._callback.closeForm();
+  }
+
   _formSubmitHandler(evt) {
     evt.preventDefault();
-    this._callback.formSubmit(FormCreator.parseDataToPoint(this._data));
+    this._callback.formSubmit(FormEditor.parseDataToPoint(this._data));
   }
 
   _pointClickHandler(evt) {
@@ -276,6 +229,7 @@ export default class FormCreator extends SmartView {
   restoreHandlers() {
     this._setInnerHandlers();
     this._setDatepicker();
+    this.setFormCloseHandler(this._callback.formClose);
     this.setFormSubmitHandler(this._callback.formSubmit);
     this.setDeleteClickHandler(this._callback.deleteClick);
   }
@@ -284,7 +238,7 @@ export default class FormCreator extends SmartView {
     this._callback.closeForm = callback;
     this.getElement()
       .querySelector(`.event__rollup-btn`)
-      .addEventListener(`click`, this._setFormCloseHandler);
+      .addEventListener(`click`, this._onFormClose);
   }
 
   _eventTypeHandler(evt) {
@@ -306,14 +260,13 @@ export default class FormCreator extends SmartView {
       this.getElement()
         .querySelector(`.event__input--destination`)
         .setCustomValidity(``);
-      this.updateData(
-          {
-            destination: {
-              city: evt.target.value,
-              description: selectDestination.description,
-              pictures: selectDestination.pictures,
-            },
-          });
+      this.updateData({
+        destination: {
+          city: evt.target.value,
+          description: selectDestination.description,
+          pictures: selectDestination.pictures,
+        },
+      });
     }
   }
 
@@ -365,8 +318,8 @@ export default class FormCreator extends SmartView {
         this.getElement().querySelector(`#event-start-time-1`),
         {
           dateFormat: `d/m/Y H:i`,
-          enableTime: true,
           defaultDate: this._data.date.start.toDate(),
+          enableTime: true,
           onChange: this._startDateChangeHandler
         }
     );
@@ -375,9 +328,8 @@ export default class FormCreator extends SmartView {
         this.getElement().querySelector(`#event-end-time-1`),
         {
           dateFormat: `d/m/Y H:i`,
-          enableTime: true,
-          minDate: this._data.date.start.toDate(),
           defaultDate: this._data.date.finish.toDate(),
+          enableTime: true,
           onChange: this._endDateChangeHandler
         }
     );
@@ -405,7 +357,7 @@ export default class FormCreator extends SmartView {
 
   _formDeleteClickHandler(evt) {
     evt.preventDefault();
-    this._callback.deleteClick(FormCreator.parseDataToPoint(this._data));
+    this._callback.deleteClick(FormEditor.parseDataToPoint(this._data));
   }
 
   setDeleteClickHandler(callback) {
@@ -430,6 +382,6 @@ export default class FormCreator extends SmartView {
   }
 
   reset(point, offers) {
-    this.updateData(FormCreator.parsePointToData(point, offers));
+    this.updateData(FormEditor.parsePointToData(point, offers));
   }
 }

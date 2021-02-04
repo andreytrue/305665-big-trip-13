@@ -12,6 +12,7 @@ export default class PointNew {
     this._handleFormSubmit = this._handleFormSubmit.bind(this);
     this._handleDeleteClick = this._handleDeleteClick.bind(this);
     this._escKeyDownHandler = this._escKeyDownHandler.bind(this);
+    this._onFormClose = this._onFormClose.bind(this);
   }
 
   init(offers, destinations) {
@@ -21,6 +22,7 @@ export default class PointNew {
 
     this._pointEditComponent = new TaskEditView(DEFAULT_POINT, offers, destinations);
     this._pointEditComponent.setFormSubmitHandler(this._handleFormSubmit);
+    this._pointEditComponent.setFormCloseHandler(this._onFormClose);
     this._pointEditComponent.setDeleteClickHandler(this._handleDeleteClick);
 
     render(this._pointListContainer, this._pointEditComponent, RenderPosition.AFTERBEGIN);
@@ -77,5 +79,9 @@ export default class PointNew {
       evt.preventDefault();
       this.destroy();
     }
+  }
+
+  _onFormClose() {
+    this.destroy();
   }
 }

@@ -46,7 +46,6 @@ const handleSiteMenuClick = (menuItem) => {
     default:
       tripPresenter.init();
       infoPresenter.init();
-      evt.target.disabled = true;
       remove(statsComponent);
       break;
   }

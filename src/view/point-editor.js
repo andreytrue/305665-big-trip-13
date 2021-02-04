@@ -56,7 +56,7 @@ const createFormEditorTemplate = (point, types, destinations) => {
     isDeleting
   } = point;
 
-  const typeList = types.map((elem) => createPointTypeListTemplate(elem.type, isDisabled)).join(``);
+  const typeList = types.map((elem) => createPointTypeListTemplate(elem.type, type, isDisabled)).join(``);
 
   const offersForThisType = types.filter((offer) => offer.type === type)[0].offers;
 
@@ -328,6 +328,7 @@ export default class FormEditor extends SmartView {
         this.getElement().querySelector(`#event-end-time-1`),
         {
           dateFormat: `d/m/Y H:i`,
+          minDate: this._data.date.start.toDate(),
           defaultDate: this._data.date.finish.toDate(),
           enableTime: true,
           onChange: this._endDateChangeHandler
